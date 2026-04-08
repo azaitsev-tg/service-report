@@ -1,8 +1,8 @@
 # ⚙️ Service Report App (PWA)
 
-[![PWA](httpsimg.shields.iobadgePWA-Ready-success.svg)](#)
-[![JS](httpsimg.shields.iobadgeVanilla-JavaScript-yellow.svg)](#)
-[![PDF](httpsimg.shields.iobadgepdf--lib-v1.17.1-blue.svg)](#)
+![PWA](https://flat.badgen.net/badge/PWA/Ready/green)
+![JS](https://flat.badgen.net/badge/JS/Vanilla/yellow)
+![PDF](https://flat.badgen.net/badge/pdf-lib/v1.17.1/blue)
 
 Мобильное веб-приложение (Progressive Web App) для сервисного отдела. Предназначено для автоматизации сбора, форматирования и отправки технической отчетности с объектов (ремонт, диагностика, ТО профессионального фитнес-оборудования) напрямую в офис.
 
