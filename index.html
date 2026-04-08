@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technogym | Service Report</title>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        /* Technogym Corporate Style Variables */
+        :root {
+            --tg-yellow: #FFCE00;
+            --tg-black: #111111;
+            --tg-dark-gray: #2B2B2B;
+            --tg-light-gray: #F5F5F7;
+            --tg-border: #E0E0E0;
+            --tg-error: #E53935;
+            --tg-success: #43A047;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; padding: 15px; background: var(--tg-light-gray); color: var(--tg-black); margin: 0; }
+        .container { max-width: 500px; margin: 0 auto; background: #ffffff; padding: 25px 20px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+        
+        h3 { margin-top: 0; color: var(--tg-black); font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 4px solid var(--tg-yellow); padding-bottom: 12px; margin-bottom: 25px;}
+        .block-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--tg-black); display: flex; align-items: center; gap: 8px;}
+        .hint { display: block; font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.4; transition: color 0.3s;}
+        
+        .block { margin-bottom: 24px; padding: 18px; border: 1px solid var(--tg-border); border-radius: 12px; background: #ffffff; transition: box-shadow 0.3s ease; }
+        .block:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .required { border-left: 4px solid var(--tg-yellow); background: #FFFAEB; }
+
+        input[type="file"], input[type="text"], input[type="date"], select { width: 100%; padding: 14px; border: 1.5px solid var(--tg-border); border-radius: 8px; box-sizing: border-box; font-size: 15px; margin-bottom: 12px; background: var(--tg-light-gray); color: var(--tg-black); transition: all 0.2s; font-family: inherit;}
+        input:focus, select:focus { outline: none; border-color: var(--tg-yellow); background: #fff; box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.1); }
+        
+        .checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-top: 5px; padding: 14px; background: #fff; border-radius: 8px; border: 1.5px solid var(--tg-border); cursor: pointer; transition: 0.2s;}
+        .checkbox-container:hover { border-color: #ccc; }
+        .checkbox-container input[type="checkbox"] { width: 22px; height: 22px; margin: 0; margin-top: 2px; cursor: pointer; accent-color: var(--tg-black); flex-shrink: 0;}
+        .checkbox-content { display: flex; flex-direction: column; }
+        .checkbox-content .title { margin: 0; font-weight: 600; font-size: 14px; color: var(--tg-black); }
+        .checkbox-content .desc { font-size: 12px; color: #E65100; font-weight: normal; margin-top: 4px; line-height: 1.3;}
+
+        button { cursor: pointer; border: none; border-radius: 8px; font-weight: 700; transition: all 0.2s; font-family: inherit; }
+        .btn-main { width: 100%; padding: 16px; background: var(--tg-yellow); color: var(--tg-black); font-size: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(255, 206, 0, 0.3);}
+        .btn-main:hover { background: #E5B900; transform: translateY(-1px); }
+        .btn-main:active { transform: translateY(1px); }
+        .btn-main:disabled { background: #e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; transform: none;}
+        
+        .btn-secondary { width: 100%; padding: 16px; background: var(--tg-dark-gray); color: #fff; font-size: 15px; margin-bottom: 10px;}
+        .btn-secondary:hover { background: var(--tg-black); }
+        .btn-secondary:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
+        
+        .btn-rotate { background: #e0e0e0; padding: 8px; font-size: 12px; margin-top: 8px; width: 100%; color: var(--tg-black); font-weight: 600; border-radius: 6px;}
+        .btn-rotate:hover { background: #d0d0d0; }
+
+        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .preview-item { text-align: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--tg-border); box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .preview-canvas { max-width: 100%; height: 120px; object-fit: contain; background: var(--tg-light-gray); border-radius: 4px;}
+        
+        .result-box { display: flex; gap: 8px; margin-bottom: 8px; }
+        .result-box input { margin-bottom: 0; background: #fff; color: var(--tg-black); font-weight: 700; border: 2px solid var(--tg-dark-gray); font-size: 14px;}
+        .btn-copy { background: var(--tg-dark-gray); color: white; padding: 0 16px; border-radius: 8px; white-space: nowrap;}
+        .btn-copy:hover { background: var(--tg-black); }
+        
+        .file-name-preview { font-size: 12px; color: #666; font-family: monospace; background: #eee; padding: 8px; border-radius: 6px; margin-bottom: 20px; word-break: break-all;}
+
+        #statusContainer { display: none; margin-top: 15px; padding: 16px; border-radius: 8px; background: #FFFDE7; border: 1px solid #FFF59D; text-align: center;}
+        #spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--tg-black); animation: spin 1s infinite linear; vertical-align: middle; margin-right: 10px;}
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #statusText { font-size: 15px; font-weight: 700; color: var(--tg-black); vertical-align: middle;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Service Report</h3>
+
+    <div class="block">
+        <div class="block-title">📋 Данные заявки</div>
+        <span class="hint" id="ticketHint">Форматы: <b>P.XX-0000XXXX</b> или <b>ПРОЗ-XX-00XXX</b></span>
+        
+        <input type="text" id="ticketNumber" placeholder="Номер заявки (P. / ПРОЗ-)" oninput="handleTicketInput(event)">
+        
+        <select id="workType" onchange="updateResults()">
+            <option value="" disabled selected>Вид работ...</option>
+            <option value="диагностика/ремонт">Диагностика / Ремонт</option>
+            <option value="замена запчастей">Замена запчастей</option>
+            <option value="ТО (осмотр)">ТО (осмотр)</option>
+            <option value="ТО (регламентное)">ТО (регламентное)</option>
+            <option value="сборка">Сборка</option>
+        </select>
+        
+        <input type="text" id="clientData" placeholder="Заказчик / Объект" oninput="updateResults()">
+        
+        <label style="font-size: 13px; font-weight: 600; color: #666; margin-bottom: 4px; display: block;">📅 Дата выполнения работ <span style="color:red">*</span></label>
+        <input type="date" id="workDate" onchange="updateResults()">
+        
+        <label class="checkbox-container">
+            <input type="checkbox" id="hasPartsOrder" onchange="updateResults()">
+            <div class="checkbox-content">
+                <span class="title">К отчету прилагается лист заказа запчастей</span>
+                <span class="desc">⚠️ Важно: Файл листа заказа (Excel/Word) необходимо прикрепить к письму отдельным вложением вручную.</span>
+            </div>
+        </label>
+    </div>
+
+    <div class="block required">
+        <div class="block-title">📝 1. Акт выполненных работ <span style="color:red; margin-left:4px;">*</span></div>
+        <span class="hint">Фото или PDF. Можно выбрать несколько страниц.</span>
+        <input type="file" id="actFiles" accept="image/*, application/pdf" multiple onchange="handleDocsUpload(event, 'actPreviews')">
+        <div id="actPreviews" class="preview-grid"></div>
+    </div>
+
+    <div class="block">
+        <div class="block-title">🗂️ 2. Прочие документы</div>
+        <span class="hint">УПД, Накладная, Лист заказа (Фото или PDF).</span>
+        <input type="file" id="otherDocs" accept="image/*, application/pdf" multiple onchange="handleDocsUpload(event, 'otherDocsPreviews')">
+        <div id="otherDocsPreviews" class="preview-grid"></div>
+    </div>
+
+    <div class="block">
+        <div class="block-title">📸 3. Фотоотчет</div>
+        <span class="hint">Оборудование, шильдики (Только фото). Сжимается автоматически.</span>
+        <input type="file" id="photoReport" accept="image/*" multiple onchange="handlePhotosPreview(event)">
+        <div id="photoStatus" style="font-size: 13px; font-weight: bold; color: var(--tg-success); margin-top: 8px;"></div>
+    </div>
+
+    <div class="block" style="margin-bottom: 0;">
+        <div class="block-title">🚀 Итоги и отправка</div>
+        <span class="hint">Тема письма:</span>
+        <div class="result-box">
+            <input type="text" id="emailSubject" readonly placeholder="Заполните данные выше...">
+            <button type="button" class="btn-copy" onclick="copySubject()">📋 Копировать</button>
+        </div>
+        <div class="file-name-preview" id="fileNamePreview">📄 Имя файла: ...</div>
+        
+        <button id="btnSend" class="btn-main" onclick="startProcess('share')">✉️ Сформировать и отправить</button>
+        <button id="btnSave" class="btn-secondary" onclick="startProcess('save')">💾 Сохранить</button>
+
+        <div id="statusContainer">
+            <div id="spinner"></div>
+            <span id="statusText">Инициализация...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- АРХИТЕКТУРА ДЛЯ БАЗЫ ДАННЫХ (ЗАГЛУШКА) ---
+    async function fetchTicketDataFromDB(ticketNumber) {
+        console.log("DB Hook Triggered for:", ticketNumber);
+    }
+
+    // --- СЛОВАРЬ СОКРАЩЕНИЙ (ДЛЯ ТЕМЫ ПИСЬМА) ---
+    const abbreviations = {
+        "диагностика/ремонт": "диагн+рем",
+        "замена запчастей": "замена з/ч",
+        "ТО (осмотр)": "ТО осмотр",
+        "ТО (регламентное)": "ТО регл.",
+        "сборка": "сборка"
+    };
+
+    const ticketRegex = /^(P\.\d{2}-0000\d{4}|ПРОЗ-\d{2}-00\d{3})$/;
+    window.documentImagesMap = {};
+
+    // --- ПРЕДИКТИВНЫЙ ВВОД (МАСКА) ---
+    let previousTicketValue = "";
+    
+    function handleTicketInput(e) {
+        let input = e.target;
+        let val = input.value.toUpperCase();
+
+        if (val.startsWith('Р')) val = 'P' + val.substring(1);
+
+        let isDeleting = val.length < previousTicketValue.length;
+
+        if (!isDeleting) {
+            if (val === 'P') {
+                val = 'P.';
+            } else if (val === 'П') {
+                val = 'ПРОЗ-';
+            } else if (val.startsWith('P.') && val.length === 4 && previousTicketValue.length === 3) {
+                val += '-0000';
+            } else if (val.startsWith('ПРОЗ-') && val.length === 7 && previousTicketValue.length === 6) {
+                val += '-00';
+            }
+        }
+
+        // Строгие ограничители длины (оба формата корректно)
+        if (val.startsWith('P.') && val.length > 13) val = val.substring(0, 13);
+        if (val.startsWith('ПРОЗ-') && val.length > 13) val = val.substring(0, 13);
+
+        input.value = val;
+        previousTicketValue = val;
+        
+        const hintEl = document.getElementById('ticketHint');
+        if (val.length > 0) {
+            if (ticketRegex.test(val)) {
+                input.style.borderColor = 'var(--tg-success)';
+                input.style.borderWidth = '2px';
+                hintEl.innerHTML = 'Формат введен верно ✅';
+                hintEl.style.color = 'var(--tg-success)';
+                fetchTicketDataFromDB(val); 
+            } else {
+                input.style.borderColor = 'var(--tg-error)';
+                input.style.borderWidth = '2px';
+                hintEl.innerHTML = '⚠️ Неверный формат! Нужно: P.XX-0000XXXX или ПРОЗ-XX-00XXX';
+                hintEl.style.color = 'var(--tg-error)';
+            }
+        } else {
+            input.style.borderColor = 'var(--tg-border)';
+            input.style.borderWidth = '1.5px';
+            hintEl.innerHTML = 'Форматы: <b>P.XX-0000XXXX</b> или <b>ПРОЗ-XX-00XXX</b>';
+            hintEl.style.color = '#666';
+        }
+
+        updateResults();
+    }
+
+    // --- ФОРМАТЕРЫ И ОЧИСТИТЕЛИ ---
+    function formatDates(dateString) {
+        if(!dateString) return { full: "", short: "" };
+        const d = new Date(dateString);
+        const day = ("0" + d.getDate()).slice(-2);
+        const month = ("0" + (d.getMonth() + 1)).slice(-2);
+        const yearFull = d.getFullYear();
+        const yearShort = yearFull.toString().slice(-2);
+        return {
+            full: `${day}.${month}.${yearFull}`,
+            short: `${day}.${month}.${yearShort}`
+        };
+    }
+
+    // Очистка только запрещенных в Windows символов для имени файла
+    function cleanObjectNameForFile(name) {
+        if(!name) return "";
+        // Удаляем только те символы, которые ломают файловую систему ОС (< > : " / \ | ? * « »)
+        return name.replace(/[<>:"\/\\|?*«»]/g, '').trim().replace(/\s+/g, ' ');
+    }
+
+    // --- СБОРКА ТЕМЫ И ИМЕНИ ФАЙЛА ---
+    function updateResults() {
+        const ticketRaw = document.getElementById('ticketNumber').value.trim();
+        const typeRaw = document.getElementById('workType').value;
+        const client = document.getElementById('clientData').value.trim();
+        const dateRaw = document.getElementById('workDate').value;
+        const hasOrderList = document.getElementById('hasPartsOrder').checked;
+        
+        if (!ticketRaw && !typeRaw && !client) {
+            document.getElementById('emailSubject').value = "";
+            document.getElementById('fileNamePreview').innerText = "📄 Имя файла: ...";
+            return;
+        }
+
+        const dates = formatDates(dateRaw);
+        const typeShort = abbreviations[typeRaw] || typeRaw || "";
+
+        // 1. Сборка Темы письма (без удаления кавычек)
+        const subjectParts = [ticketRaw, client, dates.full, typeShort].filter(Boolean);
+        let finalSubject = subjectParts.join(' '); 
+        if (hasOrderList) finalSubject += " + лист заказа";
+        document.getElementById('emailSubject').value = finalSubject;
+
+        // 2. Сборка Имени файла (с удалением спецсимволов ОС)
+        const safeClientName = cleanObjectNameForFile(client);
+        const fileParts = [ticketRaw, safeClientName, dates.short].filter(Boolean);
+        const finalFileName = fileParts.join(' ') + ".pdf";
+        document.getElementById('fileNamePreview').innerText = `📄 Имя файла: ${finalFileName}`;
+    }
+
+    function copySubject() {
+        const text = document.getElementById('emailSubject').value;
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector('.btn-copy');
+            btn.innerText = "✅ Успешно!";
+            setTimeout(() => btn.innerText = "📋 Копировать", 2000);
+        });
+    }
+
+    // --- ЛОГИКА РАБОТЫ С КАРТИНКАМИ И КАНВАСОМ ---
+    function drawCanvas(canvasId, imgObj) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (imgObj.currentRotation % 180 === 0) {
+            canvas.width = imgObj.width; canvas.height = imgObj.height;
+        } else {
+            canvas.width = imgObj.height; canvas.height = imgObj.width;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((imgObj.currentRotation * Math.PI) / 180);
+        ctx.drawImage(imgObj, -imgObj.width / 2, -imgObj.height / 2);
+    }
+
+    function rotateCanvas(canvasId) {
+        const imgObj = window.documentImagesMap[canvasId];
+        if(!imgObj) return;
+        imgObj.currentRotation = (imgObj.currentRotation + 90) % 360;
+        drawCanvas(canvasId, imgObj);
+    }
+
+    function exportRotatedCanvas(canvasId, maxWidth = 1600, quality = 0.85) {
+        const imgObj = window.documentImagesMap[canvasId];
+        if (!imgObj) return null;
+        const tempCanvas = document.createElement('canvas');
+        let scale = 1;
+        if (imgObj.width > maxWidth || imgObj.height > maxWidth) {
+            scale = maxWidth / Math.max(imgObj.width, imgObj.height);
+        }
+        const isRotated = (imgObj.currentRotation % 180 !== 0);
+        const targetW = isRotated ? imgObj.height : imgObj.width;
+        const targetH = isRotated ? imgObj.width : imgObj.height;
+
+        tempCanvas.width = targetW * scale;
+        tempCanvas.height = targetH * scale;
+        const ctx = tempCanvas.getContext('2d');
+        ctx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+        ctx.rotate((imgObj.currentRotation * Math.PI) / 180);
+        ctx.drawImage(imgObj, -(imgObj.width * scale) / 2, -(imgObj.height * scale) / 2, imgObj.width * scale, imgObj.height * scale);
+        return tempCanvas.toDataURL('image/jpeg', quality);
+    }
+
+    function handleDocsUpload(event, containerId) {
+        const files = event.target.files;
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; 
+        for (let key in window.documentImagesMap) {
+            if (key.startsWith(containerId)) delete window.documentImagesMap[key];
+        }
+
+        Array.from(files).forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const canvasId = `${containerId}_canvas_${index}`;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'preview-item';
+                wrapper.innerHTML = `
+                    <canvas id="${canvasId}" class="preview-canvas"></canvas>
+                    <button type="button" class="btn-rotate" onclick="rotateCanvas('${canvasId}')">Повернуть ↻</button>
+                `;
+                container.appendChild(wrapper);
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        img.currentRotation = 0;
+                        window.documentImagesMap[canvasId] = img;
+                        drawCanvas(canvasId, img);
+                    };
+                };
+            } else if (file.type === 'application/pdf') {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.justifyContent = 'center';
+                div.innerHTML = `<span style="font-size:12px; font-weight:bold;">📄 PDF Документ<br>${file.name}</span>`;
+                container.appendChild(div);
+            }
+        });
+    }
+
+    function handlePhotosPreview(event) {
+        const count = event.target.files.length;
+        document.getElementById('photoStatus').innerText = count > 0 ? `К сжатию готово: ${count} фото 📸` : '';
+    }
+
+    function setStatus(text, isDone = false, isError = false) {
+        const statusText = document.getElementById('statusText');
+        const spinner = document.getElementById('spinner');
+        statusText.innerText = text;
+        spinner.style.display = isDone ? 'none' : 'inline-block';
+        if (isError) statusText.style.color = 'var(--tg-error)'; 
+        else if (isDone) statusText.style.color = 'var(--tg-success)'; 
+        else statusText.style.color = 'var(--tg-black)'; 
+    }
+
+    function compressPhotoFile(file, maxWidth = 800, quality = 0.65) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = e => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let scale = img.width > maxWidth ? maxWidth / img.width : 1;
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+            };
+        });
+    }
+
+    async function processFileInput(inputId, containerPrefix, finalPdf, PDFDocument, statusTextStr) {
+        const files = document.getElementById(inputId).files;
+        if (files.length === 0) return;
+        setStatus(statusTextStr);
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.type === 'application/pdf') {
+                const bytes = await file.arrayBuffer();
+                const pdfToMerge = await PDFDocument.load(bytes);
+                const copied = await finalPdf.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
+                copied.forEach(p => finalPdf.addPage(p));
+            } else if (file.type.startsWith('image/')) {
+                const canvasId = `${containerPrefix}_canvas_${i}`;
+                const dataUrl = exportRotatedCanvas(canvasId, 1600, 0.85); 
+                if (dataUrl) {
+                    const img = await finalPdf.embedJpg(dataUrl);
+                    const page = finalPdf.addPage([img.width, img.height]);
+                    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+                }
+            }
+        }
+    }
+
+    function downloadBlob(blob, fileName) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function openMailToFallback(subject) {
+        setTimeout(() => {
+            const bodyText = "Отчет по заявке был сохранен на ваше устройство. Пожалуйста, прикрепите его к этому письму вручную.";
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+        }, 1500); 
+    }
+
+    // --- ГЛАВНЫЙ ПРОЦЕСС СБОРКИ ---
+    async function startProcess(action) {
+        const ticketNumber = document.getElementById('ticketNumber').value.trim();
+        const dateRaw = document.getElementById('workDate').value;
+        const subject = document.getElementById('emailSubject').value;
+        const actFiles = document.getElementById('actFiles').files;
+
+        if (!ticketRegex.test(ticketNumber)) {
+            alert("⚠️ Ошибка формата!\nНомер заявки введен некорректно.\n\nПроверьте подсказку под полем."); return;
+        }
+        if (!dateRaw) { alert("⚠️ Укажите дату!\nПожалуйста, выберите фактическую дату выполнения работ."); return; }
+        if (!subject) { alert("⚠️ Заполните данные заявки!"); return; }
+        if (actFiles.length === 0) { alert("⚠️ Прикрепите Акт выполненных работ!"); return; }
+
+        document.getElementById('btnSend').disabled = true;
+        document.getElementById('btnSave').disabled = true;
+        document.getElementById('statusContainer').style.display = 'block';
+        setStatus("Подготовка ядра PDF...", false);
+
+        try {
+            const { PDFDocument } = window.PDFLib;
+            const finalPdf = await PDFDocument.create();
+
+            await processFileInput('actFiles', 'actPreviews', finalPdf, PDFDocument, "Обработка Актов 📝...");
+            await processFileInput('otherDocs', 'otherDocsPreviews', finalPdf, PDFDocument, "Обработка документов 🗂️...");
+
+            const photos = document.getElementById('photoReport').files;
+            if (photos.length > 0) {
+                const a4W = 595.28, a4H = 841.89;
+                let currentPhotoPage = null;
+                for (let i = 0; i < photos.length; i++) {
+                    setStatus(`Сжатие фото 📸 (${i + 1} из ${photos.length})...`);
+                    const compData = await compressPhotoFile(photos[i], 800, 0.65);
+                    const photoImg = await finalPdf.embedJpg(compData);
+                    if (i % 2 === 0) currentPhotoPage = finalPdf.addPage([a4W, a4H]);
+                    const margin = 20;
+                    const maxImgW = a4W - (margin * 2);
+                    const maxImgH = (a4H / 2) - (margin * 1.5);
+                    const scale = Math.min(maxImgW / photoImg.width, maxImgH / photoImg.height);
+                    const drawW = photoImg.width * scale;
+                    const drawH = photoImg.height * scale;
+                    const x = (a4W - drawW) / 2;
+                    const y = (i % 2 === 0) ? (a4H - drawH - margin) : margin;
+                    currentPhotoPage.drawImage(photoImg, { x, y, width: drawW, height: drawH });
+                }
+            }
+
+            setStatus("Формирование файла...", false);
+            
+            // Собираем точное, безопасное имя файла
+            const ticketRaw = document.getElementById('ticketNumber').value.trim();
+            const client = document.getElementById('clientData').value.trim();
+            const dates = formatDates(dateRaw);
+            const safeClientName = cleanObjectNameForFile(client);
+            const fileParts = [ticketRaw, safeClientName, dates.short].filter(Boolean);
+            const fileName = fileParts.join(' ') + ".pdf";
+
+            const pdfBytes = await finalPdf.save();
+            const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const fileToShare = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+            if (action === 'share') {
+                if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+                    setStatus("Открытие меню отправки...", true);
+                    try {
+                        await navigator.share({ 
+                            files: [fileToShare], 
+                            title: subject,
+                            text: 'Отчет: ' + subject
+                        });
+                        setStatus("Успешно передано! ✅", true);
+                    } catch (shareError) {
+                        setStatus("ОС прервала отправку. Открываем почту...", true);
+                        downloadBlob(pdfBlob, fileName);
+                        openMailToFallback(subject);
+                    }
+                } else {
+                    setStatus("Передача файлов не поддерживается браузером. Открываем почту...", true);
+                    downloadBlob(pdfBlob, fileName);
+                    openMailToFallback(subject);
+                }
+            } else if (action === 'save') {
+                downloadBlob(pdfBlob, fileName);
+                setStatus("Файл успешно сохранен! 💾", true);
+            }
+
+        } catch (e) {
+            console.error("Глобальная ошибка сборки:", e);
+            setStatus("Произошла ошибка при сборке документа ❌", true, true);
+        } finally {
+            document.getElementById('btnSend').disabled = false;
+            document.getElementById('btnSave').disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
