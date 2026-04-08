@@ -30,7 +30,21 @@
         .block:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .required { border-left: 4px solid var(--tg-yellow); background: #FFFAEB; }
 
-        input[type="file"], input[type="text"], input[type="date"], select { width: 100%; padding: 14px; border: 1.5px solid var(--tg-border); border-radius: 8px; box-sizing: border-box; font-size: 15px; margin-bottom: 12px; background: var(--tg-light-gray); color: var(--tg-black); transition: all 0.2s; font-family: inherit;}
+                input[type="file"], input[type="text"], input[type="date"], select { 
+            display: block;
+            width: 100%; 
+            padding: 14px; 
+            border: 1.5px solid var(--tg-border); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 15px; 
+            margin: 0 0 12px 0; /* Принудительно обнуляем боковые отступы iOS */
+            background: var(--tg-light-gray); 
+            color: var(--tg-black); 
+            transition: all 0.2s; 
+            font-family: inherit;
+        }
+
         input:focus, select:focus { outline: none; border-color: var(--tg-yellow); background: #fff; box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.1); }
         
         .checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-top: 5px; padding: 14px; background: #fff; border-radius: 8px; border: 1.5px solid var(--tg-border); cursor: pointer; transition: 0.2s;}
