@@ -44,7 +44,13 @@
             transition: all 0.2s; 
             font-family: inherit;
         }
-
+/* Принудительное отключение системных габаритов Apple для поля даты */
+        input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            max-width: 100%;
+        }
         input:focus, select:focus { outline: none; border-color: var(--tg-yellow); background: #fff; box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.1); }
         
         .checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-top: 5px; padding: 14px; background: #fff; border-radius: 8px; border: 1.5px solid var(--tg-border); cursor: pointer; transition: 0.2s;}
