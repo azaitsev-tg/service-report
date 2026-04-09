@@ -23,35 +23,22 @@
         .container { max-width: 500px; margin: 0 auto; background: #ffffff; padding: 25px 20px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
         
         h3 { margin-top: 0; color: var(--tg-black); font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 4px solid var(--tg-yellow); padding-bottom: 12px; margin-bottom: 25px;}
-        .block-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--tg-black); display: flex; align-items: center; gap: 8px;}
+        
+        /* Измененные стили заголовков для кнопки "Очистить" */
+        .block-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
+        .block-title-left { font-size: 16px; font-weight: 700; color: var(--tg-black); display: flex; align-items: center; gap: 8px;}
         .hint { display: block; font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.4; transition: color 0.3s;}
         
         .block { margin-bottom: 24px; padding: 18px; border: 1px solid var(--tg-border); border-radius: 12px; background: #ffffff; transition: box-shadow 0.3s ease; }
         .block:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .required { border-left: 4px solid var(--tg-yellow); background: #FFFAEB; }
 
-                input[type="file"], input[type="text"], input[type="date"], select { 
-            display: block;
-            width: 100%; 
-            min-height: 50px; /* Выравниваем высоту всех полей */
-            padding: 14px; 
-            border: 1.5px solid var(--tg-border); 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 15px; 
-            margin: 0 0 12px 0; /* Принудительно обнуляем боковые отступы iOS */
-            background: var(--tg-light-gray); 
-            color: var(--tg-black); 
-            transition: all 0.2s; 
-            font-family: inherit;
+        input[type="file"], input[type="text"], input[type="date"], select { 
+            display: block; width: 100%; min-height: 50px; padding: 14px; border: 1.5px solid var(--tg-border); border-radius: 8px; box-sizing: border-box; font-size: 15px; margin: 0 0 12px 0; background: var(--tg-light-gray); color: var(--tg-black); transition: all 0.2s; font-family: inherit;
         }
-/* Принудительное отключение системных габаритов Apple для поля даты */
-        input[type="date"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            max-width: 100%;
-        }
+        
+        /* Отключение системных габаритов Apple */
+        input[type="date"] { -webkit-appearance: none; appearance: none; width: 100%; max-width: 100%; }
         input:focus, select:focus { outline: none; border-color: var(--tg-yellow); background: #fff; box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.1); }
         
         .checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-top: 5px; padding: 14px; background: #fff; border-radius: 8px; border: 1.5px solid var(--tg-border); cursor: pointer; transition: 0.2s;}
@@ -71,12 +58,21 @@
         .btn-secondary:hover { background: var(--tg-black); }
         .btn-secondary:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
         
-        .btn-rotate { background: #e0e0e0; padding: 8px; font-size: 12px; margin-top: 8px; width: 100%; color: var(--tg-black); font-weight: 600; border-radius: 6px;}
+        /* Стили Карусели и Кнопок Управления */
+        .btn-clear { display: none; background: transparent; border: 1.5px solid var(--tg-error); color: var(--tg-error); font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 700; transition: 0.2s; white-space: nowrap;}
+        .btn-clear:hover { background: var(--tg-error); color: white; }
+        
+        .carousel { display: flex; overflow-x: auto; gap: 12px; padding: 8px 4px 12px 4px; margin-top: 5px; scrollbar-width: thin; scroll-behavior: smooth;}
+        .carousel::-webkit-scrollbar { height: 6px; }
+        .carousel::-webkit-scrollbar-thumb { background-color: var(--tg-border); border-radius: 4px; }
+        
+        .preview-item { flex: 0 0 130px; position: relative; text-align: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--tg-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+        .preview-canvas { max-width: 100%; height: 110px; object-fit: contain; background: var(--tg-light-gray); border-radius: 4px;}
+        
+        .btn-remove { position: absolute; top: -8px; right: -8px; background: var(--tg-error); color: #fff; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(229,57,53,0.3); z-index: 10; cursor: pointer; transition: 0.2s;}
+        .btn-remove:hover { transform: scale(1.1); }
+        .btn-rotate { background: #e0e0e0; padding: 6px; font-size: 11px; margin-top: 8px; width: 100%; color: var(--tg-black); font-weight: 700; border-radius: 6px;}
         .btn-rotate:hover { background: #d0d0d0; }
-
-        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-        .preview-item { text-align: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--tg-border); box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
-        .preview-canvas { max-width: 100%; height: 120px; object-fit: contain; background: var(--tg-light-gray); border-radius: 4px;}
         
         .result-box { display: flex; gap: 8px; margin-bottom: 8px; }
         .result-box input { margin-bottom: 0; background: #fff; color: var(--tg-black); font-weight: 700; border: 2px solid var(--tg-dark-gray); font-size: 14px;}
@@ -97,7 +93,9 @@
     <h3>Service Report</h3>
 
     <div class="block">
-        <div class="block-title">📋 Данные заявки</div>
+        <div class="block-title">
+            <div class="block-title-left">📋 Данные заявки</div>
+        </div>
         <span class="hint" id="ticketHint">Форматы: <b>P.XX-0000XXXX</b> или <b>ПРОЗ-XX-00XXX</b></span>
         
         <input type="text" id="ticketNumber" placeholder="Номер заявки (P. / ПРОЗ-)" oninput="handleTicketInput(event)">
@@ -126,28 +124,39 @@
     </div>
 
     <div class="block required">
-        <div class="block-title">📝 1. Акт выполненных работ <span style="color:red; margin-left:4px;">*</span></div>
-        <span class="hint">Фото или PDF. Можно выбрать несколько страниц.</span>
-        <input type="file" id="actFiles" accept="image/*, application/pdf" multiple onchange="handleDocsUpload(event, 'actPreviews')">
-        <div id="actPreviews" class="preview-grid"></div>
+        <div class="block-title">
+            <div class="block-title-left">📝 1. Акт выполненных работ <span style="color:red; margin-left:4px;">*</span></div>
+            <button class="btn-clear" id="clear_actFiles" onclick="clearBasket('actFiles')">🗑️ Очистить</button>
+        </div>
+        <span class="hint">Фото или PDF. Можно догружать файлы.</span>
+        <input type="file" id="actFiles" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'actFiles')">
+        <div id="actPreviews" class="carousel"></div>
     </div>
 
     <div class="block">
-        <div class="block-title">🗂️ 2. Прочие документы</div>
-        <span class="hint">УПД, Накладная, Лист заказа (Фото или PDF).</span>
-        <input type="file" id="otherDocs" accept="image/*, application/pdf" multiple onchange="handleDocsUpload(event, 'otherDocsPreviews')">
-        <div id="otherDocsPreviews" class="preview-grid"></div>
+        <div class="block-title">
+            <div class="block-title-left">🗂️ 2. Прочие документы</div>
+            <button class="btn-clear" id="clear_otherDocs" onclick="clearBasket('otherDocs')">🗑️ Очистить</button>
+        </div>
+        <span class="hint">УПД, Накладная (Фото или PDF). Можно догружать.</span>
+        <input type="file" id="otherDocs" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'otherDocs')">
+        <div id="otherDocsPreviews" class="carousel"></div>
     </div>
 
     <div class="block">
-        <div class="block-title">📸 3. Фотоотчет</div>
+        <div class="block-title">
+            <div class="block-title-left">📸 3. Фотоотчет</div>
+            <button class="btn-clear" id="clear_photoReport" onclick="clearBasket('photoReport')">🗑️ Очистить</button>
+        </div>
         <span class="hint">Оборудование, шильдики (Только фото). Сжимается автоматически.</span>
-        <input type="file" id="photoReport" accept="image/*" multiple onchange="handlePhotosPreview(event)">
-        <div id="photoStatus" style="font-size: 13px; font-weight: bold; color: var(--tg-success); margin-top: 8px;"></div>
+        <input type="file" id="photoReport" accept="image/*" multiple onchange="handleFilesUpload(event, 'photoReport')">
+        <div id="photoReportPreviews" class="carousel"></div>
     </div>
 
     <div class="block" style="margin-bottom: 0;">
-        <div class="block-title">🚀 Итоги и отправка</div>
+        <div class="block-title">
+            <div class="block-title-left">🚀 Итоги и отправка</div>
+        </div>
         <span class="hint">Тема письма:</span>
         <div class="result-box">
             <input type="text" id="emailSubject" readonly placeholder="Заполните данные выше...">
@@ -166,12 +175,142 @@
 </div>
 
 <script>
-    // --- АРХИТЕКТУРА ДЛЯ БАЗЫ ДАННЫХ (ЗАГЛУШКА) ---
-    async function fetchTicketDataFromDB(ticketNumber) {
-        console.log("DB Hook Triggered for:", ticketNumber);
+    // --- ГЛОБАЛЬНОЕ СОСТОЯНИЕ (УМНАЯ КОРЗИНА) ---
+    const appBasket = {
+        actFiles: [],
+        otherDocs: [],
+        photoReport: []
+    };
+
+    // --- ЛОГИКА ДОБАВЛЕНИЯ ФАЙЛОВ В КОРЗИНУ ---
+    function handleFilesUpload(event, category) {
+        const files = event.target.files;
+        if (files.length === 0) return;
+
+        Array.from(files).forEach(file => {
+            const id = 'file_' + Math.random().toString(36).substr(2, 9);
+            
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        appBasket[category].push({ id, file, type: 'image', imgObj: img, rotation: 0 });
+                        renderBasket(category);
+                    };
+                };
+            } else if (file.type === 'application/pdf') {
+                appBasket[category].push({ id, file, type: 'pdf' });
+                renderBasket(category);
+            }
+        });
+        
+        // Очищаем инпут, чтобы при следующем клике можно было выбрать те же самые файлы снова
+        event.target.value = ''; 
     }
 
-    // --- СЛОВАРЬ СОКРАЩЕНИЙ (ДЛЯ ТЕМЫ ПИСЬМА) ---
+    // --- РЕНДЕР КАРУСЕЛИ И УПРАВЛЕНИЕ ---
+    function renderBasket(category) {
+        let containerId = category + 'Previews';
+        if (category === 'photoReport') containerId = 'photoReportPreviews';
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        const clearBtn = document.getElementById('clear_' + category);
+        if (appBasket[category].length > 0) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+
+        appBasket[category].forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            
+            const removeBtn = `<div class="btn-remove" onclick="removeFile('${category}', '${item.id}')">✕</div>`;
+
+            if (item.type === 'image') {
+                const canvasId = `canvas_${item.id}`;
+                div.innerHTML = `
+                    ${removeBtn}
+                    <canvas id="${canvasId}" class="preview-canvas"></canvas>
+                    <button type="button" class="btn-rotate" onclick="rotateItem('${category}', '${item.id}')">Повернуть ↻</button>
+                `;
+                container.appendChild(div);
+                drawItemCanvas(canvasId, item);
+            } else {
+                div.innerHTML = `
+                    ${removeBtn}
+                    <div style="display:flex; height:110px; align-items:center; justify-content:center; background:var(--tg-light-gray); border-radius:4px; padding:8px;">
+                        <span style="font-size:12px; font-weight:bold; word-break:break-all; color: var(--tg-black);">📄 PDF<br><br>${item.file.name}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        });
+    }
+
+    function removeFile(category, id) {
+        appBasket[category] = appBasket[category].filter(i => i.id !== id);
+        renderBasket(category);
+    }
+
+    function clearBasket(category) {
+        if(confirm("Удалить все добавленные файлы из этого раздела?")) {
+            appBasket[category] = [];
+            renderBasket(category);
+        }
+    }
+
+    function drawItemCanvas(canvasId, item) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const imgObj = item.imgObj;
+        if (item.rotation % 180 === 0) {
+            canvas.width = imgObj.width; canvas.height = imgObj.height;
+        } else {
+            canvas.width = imgObj.height; canvas.height = imgObj.width;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((item.rotation * Math.PI) / 180);
+        ctx.drawImage(imgObj, -imgObj.width / 2, -imgObj.height / 2);
+    }
+
+    function rotateItem(category, id) {
+        const item = appBasket[category].find(i => i.id === id);
+        if (item) {
+            item.rotation = (item.rotation + 90) % 360;
+            drawItemCanvas(`canvas_${item.id}`, item);
+        }
+    }
+
+    // Экспорт картинки с учетом угла и нужного уровня сжатия
+    function exportRotatedImage(item, maxWidth, quality) {
+        const tempCanvas = document.createElement('canvas');
+        const imgObj = item.imgObj;
+        let scale = 1;
+        if (imgObj.width > maxWidth || imgObj.height > maxWidth) {
+            scale = maxWidth / Math.max(imgObj.width, imgObj.height);
+        }
+        const isRotated = (item.rotation % 180 !== 0);
+        const targetW = isRotated ? imgObj.height : imgObj.width;
+        const targetH = isRotated ? imgObj.width : imgObj.height;
+
+        tempCanvas.width = targetW * scale;
+        tempCanvas.height = targetH * scale;
+        const ctx = tempCanvas.getContext('2d');
+        ctx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+        ctx.rotate((item.rotation * Math.PI) / 180);
+        ctx.drawImage(imgObj, -(imgObj.width * scale) / 2, -(imgObj.height * scale) / 2, imgObj.width * scale, imgObj.height * scale);
+        return tempCanvas.toDataURL('image/jpeg', quality);
+    }
+
+
+    // --- ПРЕДИКТИВНЫЙ ВВОД И ОЧИСТКА ТЕКСТА ---
     const abbreviations = {
         "диагностика/ремонт": "диагн+рем",
         "замена запчастей": "замена з/ч",
@@ -181,32 +320,21 @@
     };
 
     const ticketRegex = /^(P\.\d{2}-0000\d{4}|ПРОЗ-\d{2}-00\d{3})$/;
-    window.documentImagesMap = {};
-
-    // --- ПРЕДИКТИВНЫЙ ВВОД (МАСКА) ---
     let previousTicketValue = "";
     
     function handleTicketInput(e) {
         let input = e.target;
         let val = input.value.toUpperCase();
-
         if (val.startsWith('Р')) val = 'P' + val.substring(1);
-
         let isDeleting = val.length < previousTicketValue.length;
 
         if (!isDeleting) {
-            if (val === 'P') {
-                val = 'P.';
-            } else if (val === 'П') {
-                val = 'ПРОЗ-';
-            } else if (val.startsWith('P.') && val.length === 4 && previousTicketValue.length === 3) {
-                val += '-0000';
-            } else if (val.startsWith('ПРОЗ-') && val.length === 7 && previousTicketValue.length === 6) {
-                val += '-00';
-            }
+            if (val === 'P') { val = 'P.'; } 
+            else if (val === 'П') { val = 'ПРОЗ-'; } 
+            else if (val.startsWith('P.') && val.length === 4 && previousTicketValue.length === 3) { val += '-0000'; } 
+            else if (val.startsWith('ПРОЗ-') && val.length === 7 && previousTicketValue.length === 6) { val += '-00'; }
         }
 
-        // Строгие ограничители длины (оба формата корректно)
         if (val.startsWith('P.') && val.length > 13) val = val.substring(0, 13);
         if (val.startsWith('ПРОЗ-') && val.length > 13) val = val.substring(0, 13);
 
@@ -220,7 +348,6 @@
                 input.style.borderWidth = '2px';
                 hintEl.innerHTML = 'Формат введен верно ✅';
                 hintEl.style.color = 'var(--tg-success)';
-                fetchTicketDataFromDB(val); 
             } else {
                 input.style.borderColor = 'var(--tg-error)';
                 input.style.borderWidth = '2px';
@@ -233,11 +360,9 @@
             hintEl.innerHTML = 'Форматы: <b>P.XX-0000XXXX</b> или <b>ПРОЗ-XX-00XXX</b>';
             hintEl.style.color = '#666';
         }
-
         updateResults();
     }
 
-    // --- ФОРМАТЕРЫ И ОЧИСТИТЕЛИ ---
     function formatDates(dateString) {
         if(!dateString) return { full: "", short: "" };
         const d = new Date(dateString);
@@ -245,20 +370,14 @@
         const month = ("0" + (d.getMonth() + 1)).slice(-2);
         const yearFull = d.getFullYear();
         const yearShort = yearFull.toString().slice(-2);
-        return {
-            full: `${day}.${month}.${yearFull}`,
-            short: `${day}.${month}.${yearShort}`
-        };
+        return { full: `${day}.${month}.${yearFull}`, short: `${day}.${month}.${yearShort}` };
     }
 
-    // Очистка только запрещенных в Windows символов для имени файла
     function cleanObjectNameForFile(name) {
         if(!name) return "";
-        // Удаляем только те символы, которые ломают файловую систему ОС (< > : " / \ | ? * « »)
         return name.replace(/[<>:"\/\\|?*«»]/g, '').trim().replace(/\s+/g, ' ');
     }
 
-    // --- СБОРКА ТЕМЫ И ИМЕНИ ФАЙЛА ---
     function updateResults() {
         const ticketRaw = document.getElementById('ticketNumber').value.trim();
         const typeRaw = document.getElementById('workType').value;
@@ -275,13 +394,11 @@
         const dates = formatDates(dateRaw);
         const typeShort = abbreviations[typeRaw] || typeRaw || "";
 
-        // 1. Сборка Темы письма (без удаления кавычек)
         const subjectParts = [ticketRaw, client, dates.full, typeShort].filter(Boolean);
         let finalSubject = subjectParts.join(' '); 
         if (hasOrderList) finalSubject += " + лист заказа";
         document.getElementById('emailSubject').value = finalSubject;
 
-        // 2. Сборка Имени файла (с удалением спецсимволов ОС)
         const safeClientName = cleanObjectNameForFile(client);
         const fileParts = [ticketRaw, safeClientName, dates.short].filter(Boolean);
         const finalFileName = fileParts.join(' ') + ".pdf";
@@ -298,94 +415,6 @@
         });
     }
 
-    // --- ЛОГИКА РАБОТЫ С КАРТИНКАМИ И КАНВАСОМ ---
-    function drawCanvas(canvasId, imgObj) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (imgObj.currentRotation % 180 === 0) {
-            canvas.width = imgObj.width; canvas.height = imgObj.height;
-        } else {
-            canvas.width = imgObj.height; canvas.height = imgObj.width;
-        }
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((imgObj.currentRotation * Math.PI) / 180);
-        ctx.drawImage(imgObj, -imgObj.width / 2, -imgObj.height / 2);
-    }
-
-    function rotateCanvas(canvasId) {
-        const imgObj = window.documentImagesMap[canvasId];
-        if(!imgObj) return;
-        imgObj.currentRotation = (imgObj.currentRotation + 90) % 360;
-        drawCanvas(canvasId, imgObj);
-    }
-
-    function exportRotatedCanvas(canvasId, maxWidth = 1600, quality = 0.85) {
-        const imgObj = window.documentImagesMap[canvasId];
-        if (!imgObj) return null;
-        const tempCanvas = document.createElement('canvas');
-        let scale = 1;
-        if (imgObj.width > maxWidth || imgObj.height > maxWidth) {
-            scale = maxWidth / Math.max(imgObj.width, imgObj.height);
-        }
-        const isRotated = (imgObj.currentRotation % 180 !== 0);
-        const targetW = isRotated ? imgObj.height : imgObj.width;
-        const targetH = isRotated ? imgObj.width : imgObj.height;
-
-        tempCanvas.width = targetW * scale;
-        tempCanvas.height = targetH * scale;
-        const ctx = tempCanvas.getContext('2d');
-        ctx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-        ctx.rotate((imgObj.currentRotation * Math.PI) / 180);
-        ctx.drawImage(imgObj, -(imgObj.width * scale) / 2, -(imgObj.height * scale) / 2, imgObj.width * scale, imgObj.height * scale);
-        return tempCanvas.toDataURL('image/jpeg', quality);
-    }
-
-    function handleDocsUpload(event, containerId) {
-        const files = event.target.files;
-        const container = document.getElementById(containerId);
-        container.innerHTML = ''; 
-        for (let key in window.documentImagesMap) {
-            if (key.startsWith(containerId)) delete window.documentImagesMap[key];
-        }
-
-        Array.from(files).forEach((file, index) => {
-            if (file.type.startsWith('image/')) {
-                const canvasId = `${containerId}_canvas_${index}`;
-                const wrapper = document.createElement('div');
-                wrapper.className = 'preview-item';
-                wrapper.innerHTML = `
-                    <canvas id="${canvasId}" class="preview-canvas"></canvas>
-                    <button type="button" class="btn-rotate" onclick="rotateCanvas('${canvasId}')">Повернуть ↻</button>
-                `;
-                container.appendChild(wrapper);
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        img.currentRotation = 0;
-                        window.documentImagesMap[canvasId] = img;
-                        drawCanvas(canvasId, img);
-                    };
-                };
-            } else if (file.type === 'application/pdf') {
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-                div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.justifyContent = 'center';
-                div.innerHTML = `<span style="font-size:12px; font-weight:bold;">📄 PDF Документ<br>${file.name}</span>`;
-                container.appendChild(div);
-            }
-        });
-    }
-
-    function handlePhotosPreview(event) {
-        const count = event.target.files.length;
-        document.getElementById('photoStatus').innerText = count > 0 ? `К сжатию готово: ${count} фото 📸` : '';
-    }
-
     function setStatus(text, isDone = false, isError = false) {
         const statusText = document.getElementById('statusText');
         const spinner = document.getElementById('spinner');
@@ -394,49 +423,6 @@
         if (isError) statusText.style.color = 'var(--tg-error)'; 
         else if (isDone) statusText.style.color = 'var(--tg-success)'; 
         else statusText.style.color = 'var(--tg-black)'; 
-    }
-
-    function compressPhotoFile(file, maxWidth = 800, quality = 0.65) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = e => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let scale = img.width > maxWidth ? maxWidth / img.width : 1;
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-            };
-        });
-    }
-
-    async function processFileInput(inputId, containerPrefix, finalPdf, PDFDocument, statusTextStr) {
-        const files = document.getElementById(inputId).files;
-        if (files.length === 0) return;
-        setStatus(statusTextStr);
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (file.type === 'application/pdf') {
-                const bytes = await file.arrayBuffer();
-                const pdfToMerge = await PDFDocument.load(bytes);
-                const copied = await finalPdf.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
-                copied.forEach(p => finalPdf.addPage(p));
-            } else if (file.type.startsWith('image/')) {
-                const canvasId = `${containerPrefix}_canvas_${i}`;
-                const dataUrl = exportRotatedCanvas(canvasId, 1600, 0.85); 
-                if (dataUrl) {
-                    const img = await finalPdf.embedJpg(dataUrl);
-                    const page = finalPdf.addPage([img.width, img.height]);
-                    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
-                }
-            }
-        }
     }
 
     function downloadBlob(blob, fileName) {
@@ -450,24 +436,67 @@
 
     function openMailToFallback(subject) {
         setTimeout(() => {
-            const bodyText = "Отчет по заявке был сохранен на ваше устройство. Пожалуйста, прикрепите его к этому письму вручную.";
+            const bodyText = "Отчет по заявке был сохранен на устройство. Прикрепите его вручную.";
             window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
         }, 1500); 
     }
 
-    // --- ГЛАВНЫЙ ПРОЦЕСС СБОРКИ ---
+    // --- СБОРКА PDF ИЗ КОРЗИНЫ ---
+    async function processBasketCategory(category, finalPdf, PDFDocument, statusTextStr, maxWidth, quality, isA4Grid = false) {
+        const items = appBasket[category];
+        if (items.length === 0) return;
+        setStatus(statusTextStr);
+
+        let currentPhotoPage = null;
+        const a4W = 595.28, a4H = 841.89;
+        let photoIndex = 0;
+
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            
+            if (item.type === 'pdf') {
+                const bytes = await item.file.arrayBuffer();
+                const pdfToMerge = await PDFDocument.load(bytes);
+                const copied = await finalPdf.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
+                copied.forEach(p => finalPdf.addPage(p));
+            } 
+            else if (item.type === 'image') {
+                const dataUrl = exportRotatedImage(item, maxWidth, quality); 
+                const img = await finalPdf.embedJpg(dataUrl);
+
+                if (isA4Grid) {
+                    // Укладка по 2 фото на А4 (Для фотоотчета)
+                    setStatus(`Сжатие фото 📸 (${i + 1} из ${items.length})...`);
+                    if (photoIndex % 2 === 0) currentPhotoPage = finalPdf.addPage([a4W, a4H]);
+                    const margin = 20;
+                    const maxImgW = a4W - (margin * 2);
+                    const maxImgH = (a4H / 2) - (margin * 1.5);
+                    const scale = Math.min(maxImgW / img.width, maxImgH / img.height);
+                    const drawW = img.width * scale;
+                    const drawH = img.height * scale;
+                    const x = (a4W - drawW) / 2;
+                    const y = (photoIndex % 2 === 0) ? (a4H - drawH - margin) : margin;
+                    currentPhotoPage.drawImage(img, { x, y, width: drawW, height: drawH });
+                    photoIndex++;
+                } else {
+                    // 1 картинка = 1 страница (Для Актов и Накладных)
+                    const page = finalPdf.addPage([img.width, img.height]);
+                    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+                }
+            }
+        }
+    }
+
+
     async function startProcess(action) {
         const ticketNumber = document.getElementById('ticketNumber').value.trim();
         const dateRaw = document.getElementById('workDate').value;
         const subject = document.getElementById('emailSubject').value;
-        const actFiles = document.getElementById('actFiles').files;
 
-        if (!ticketRegex.test(ticketNumber)) {
-            alert("⚠️ Ошибка формата!\nНомер заявки введен некорректно.\n\nПроверьте подсказку под полем."); return;
-        }
-        if (!dateRaw) { alert("⚠️ Укажите дату!\nПожалуйста, выберите фактическую дату выполнения работ."); return; }
+        if (!ticketRegex.test(ticketNumber)) { alert("⚠️ Ошибка формата номера заявки!"); return; }
+        if (!dateRaw) { alert("⚠️ Укажите дату выполнения работ."); return; }
         if (!subject) { alert("⚠️ Заполните данные заявки!"); return; }
-        if (actFiles.length === 0) { alert("⚠️ Прикрепите Акт выполненных работ!"); return; }
+        if (appBasket.actFiles.length === 0) { alert("⚠️ Прикрепите Акт выполненных работ!"); return; }
 
         document.getElementById('btnSend').disabled = true;
         document.getElementById('btnSave').disabled = true;
@@ -478,33 +507,15 @@
             const { PDFDocument } = window.PDFLib;
             const finalPdf = await PDFDocument.create();
 
-            await processFileInput('actFiles', 'actPreviews', finalPdf, PDFDocument, "Обработка Актов 📝...");
-            await processFileInput('otherDocs', 'otherDocsPreviews', finalPdf, PDFDocument, "Обработка документов 🗂️...");
-
-            const photos = document.getElementById('photoReport').files;
-            if (photos.length > 0) {
-                const a4W = 595.28, a4H = 841.89;
-                let currentPhotoPage = null;
-                for (let i = 0; i < photos.length; i++) {
-                    setStatus(`Сжатие фото 📸 (${i + 1} из ${photos.length})...`);
-                    const compData = await compressPhotoFile(photos[i], 800, 0.65);
-                    const photoImg = await finalPdf.embedJpg(compData);
-                    if (i % 2 === 0) currentPhotoPage = finalPdf.addPage([a4W, a4H]);
-                    const margin = 20;
-                    const maxImgW = a4W - (margin * 2);
-                    const maxImgH = (a4H / 2) - (margin * 1.5);
-                    const scale = Math.min(maxImgW / photoImg.width, maxImgH / photoImg.height);
-                    const drawW = photoImg.width * scale;
-                    const drawH = photoImg.height * scale;
-                    const x = (a4W - drawW) / 2;
-                    const y = (i % 2 === 0) ? (a4H - drawH - margin) : margin;
-                    currentPhotoPage.drawImage(photoImg, { x, y, width: drawW, height: drawH });
-                }
-            }
+            // 1. Акты (Высокое качество, без сетки)
+            await processBasketCategory('actFiles', finalPdf, PDFDocument, "Обработка Актов 📝...", 1600, 0.85, false);
+            // 2. Прочие документы (Высокое качество, без сетки)
+            await processBasketCategory('otherDocs', finalPdf, PDFDocument, "Обработка документов 🗂️...", 1600, 0.85, false);
+            // 3. Фотоотчет (Сильное сжатие, сетка А4)
+            await processBasketCategory('photoReport', finalPdf, PDFDocument, "Обработка Фотоотчета 📸...", 800, 0.65, true);
 
             setStatus("Формирование файла...", false);
             
-            // Собираем точное, безопасное имя файла
             const ticketRaw = document.getElementById('ticketNumber').value.trim();
             const client = document.getElementById('clientData').value.trim();
             const dates = formatDates(dateRaw);
@@ -520,11 +531,7 @@
                 if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
                     setStatus("Открытие меню отправки...", true);
                     try {
-                        await navigator.share({ 
-                            files: [fileToShare], 
-                            title: subject,
-                            text: subject
-                        });
+                        await navigator.share({ files: [fileToShare], title: subject, text: subject });
                         setStatus("Успешно передано! ✅", true);
                     } catch (shareError) {
                         setStatus("ОС прервала отправку. Открываем почту...", true);
@@ -532,7 +539,7 @@
                         openMailToFallback(subject);
                     }
                 } else {
-                    setStatus("Передача файлов не поддерживается браузером. Открываем почту...", true);
+                    setStatus("Передача файлов не поддерживается браузером.", true);
                     downloadBlob(pdfBlob, fileName);
                     openMailToFallback(subject);
                 }
@@ -542,7 +549,7 @@
             }
 
         } catch (e) {
-            console.error("Глобальная ошибка сборки:", e);
+            console.error(e);
             setStatus("Произошла ошибка при сборке документа ❌", true, true);
         } finally {
             document.getElementById('btnSend').disabled = false;
