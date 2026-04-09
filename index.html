@@ -33,6 +33,7 @@
                 input[type="file"], input[type="text"], input[type="date"], select { 
             display: block;
             width: 100%; 
+            min-height: 50px; /* Выравниваем высоту всех полей */
             padding: 14px; 
             border: 1.5px solid var(--tg-border); 
             border-radius: 8px; 
@@ -522,7 +523,7 @@
                         await navigator.share({ 
                             files: [fileToShare], 
                             title: subject,
-                            text: 'Отчет: ' + subject
+                            text: subject
                         });
                         setStatus("Успешно передано! ✅", true);
                     } catch (shareError) {
