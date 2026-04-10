@@ -168,11 +168,9 @@
         for (const file of files) {
             const id = 'file_' + Math.random().toString(36).substr(2, 9);
             
-            // Если это 3-й блок (Фотоотчет), мы НЕ грузим картинку в память. Просто кладем файл.
             if (category === 'photoReport' && file.type.startsWith('image/')) {
                 appBasket[category].push({ id, file, type: 'image_raw' });
             } 
-            // Для 1 и 2 блока (Акты, Документы) - стандартная отрисовка карусели
             else if (file.type.startsWith('image/')) {
                 await new Promise((resolve) => {
                     const img = new Image();
@@ -200,7 +198,6 @@
         const clearBtn = document.getElementById('clear_' + category);
         if (!container) return; 
 
-        // СПЕЦИАЛЬНЫЙ РЕНДЕР ДЛЯ 3-ГО БЛОКА (Smart Counter)
         if (category === 'photoReport') {
             if (appBasket[category].length > 0) {
                 inputEl.style.display = 'none'; 
@@ -220,7 +217,6 @@
             return;
         }
 
-        // СТАНДАРТНЫЙ РЕНДЕР (Карусель для 1 и 2 блоков)
         container.innerHTML = '';
         if (clearBtn) clearBtn.style.display = appBasket[category].length > 0 ? 'block' : 'none';
 
@@ -289,7 +285,6 @@
         return tempCanvas.toDataURL('image/jpeg', quality);
     }
 
-    // Ленивое сжатие (только для Фотоотчета) - 1 фото в памяти за 1 раз
     function compressRawImage(file, maxWidth, quality) {
         return new Promise((resolve) => {
             const img = new Image();
@@ -302,7 +297,7 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 resolve(canvas.toDataURL('image/jpeg', quality));
-                URL.revokeObjectURL(objectUrl); // Немедленная очистка
+                URL.revokeObjectURL(objectUrl); 
             };
             img.src = objectUrl;
         });
@@ -385,23 +380,18 @@
         
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            
-            if (category === 'photoReport') {
-                setStatus(`Сжатие фото 📸 (${i + 1} из ${items.length})...`);
-            }
+            if (category === 'photoReport') setStatus(`Сжатие фото 📸 (${i + 1} из ${items.length})...`);
 
             if (item.type === 'pdf') {
                 const pdfToMerge = await PDFDocument.load(await item.file.arrayBuffer());
                 const copied = await finalPdf.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
                 copied.forEach(p => finalPdf.addPage(p));
             } else if (item.type === 'image_raw') {
-                // Ленивая распаковка: фото сжимается и сразу стирается из памяти
                 const dataUrl = await compressRawImage(item.file, maxWidth, quality);
                 const img = await finalPdf.embedJpg(dataUrl);
                 const page = finalPdf.addPage([img.width, img.height]);
                 page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             } else {
-                // Фото из карусели
                 const img = await finalPdf.embedJpg(exportRotatedImage(item, maxWidth, quality));
                 const page = finalPdf.addPage([img.width, img.height]);
                 page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
@@ -427,14 +417,30 @@
             const fileName = document.getElementById('fileNamePreview').innerText.replace('📄 Имя файла: ', '');
             const file = new File([new Blob([pdfBytes], { type: 'application/pdf' })], fileName, { type: 'application/pdf' });
             
-            if (action === 'share' && navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title: subject, text: subject });
-                setStatus("Успешно! ✅", true);
-            } else {
+            // ИСПРАВЛЕННАЯ ЛОГИКА ФИНАЛИЗАЦИИ
+            if (action === 'share') {
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({ files: [file], title: subject, text: subject });
+                        setStatus("Успешно отправлено! ✅", true);
+                    } catch(e) {
+                        // Пользователь отменил или ошибка ОС -> запасной план (mailto)
+                        const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
+                        setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
+                        setStatus("ОС прервала отправку. Открываем почту... 💾", true);
+                    }
+                } else {
+                    // Браузер не поддерживает share
+                    const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
+                    setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
+                    setStatus("Файл скачан. Прикрепите его к письму вручную. 💾", true);
+                }
+            } else if (action === 'save') {
+                // Если нажато только СОХРАНИТЬ - качаем и ничего больше не открываем
                 const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
-                setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
-                setStatus("Файл скачан. Прикрепите его вручную. 💾", true);
+                setStatus("Файл успешно сохранен! 💾", true);
             }
+
         } catch (e) { console.error(e); setStatus("Ошибка ❌", true, true); }
     }
 </script>
