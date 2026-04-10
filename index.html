@@ -25,7 +25,7 @@
         
         .block-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
         .block-title-left { font-size: 16px; font-weight: 700; color: var(--tg-black); display: flex; align-items: center; gap: 8px;}
-        .hint { display: block; font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.4; transition: color 0.3s;}
+        .hint { display: block; font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.4;}
         
         .block { margin-bottom: 24px; padding: 18px; border: 1px solid var(--tg-border); border-radius: 12px; background: #ffffff; transition: box-shadow 0.3s ease; }
         .block:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
@@ -133,11 +133,10 @@
     <div class="block">
         <div class="block-title">
             <div class="block-title-left">📸 3. Фотоотчет</div>
-            <button class="btn-clear" id="clear_photoReport" onclick="clearBasket('photoReport')">🗑️ Очистить</button>
         </div>
-        <span class="hint">Оборудование, шильдики (Только фото).</span>
+        <span class="hint">Сжимается автоматически. Без превью (защита оперативной памяти телефона).</span>
         <input type="file" id="photoReport" accept="image/*" multiple onchange="handleFilesUpload(event, 'photoReport')">
-        <div id="photoReportPreviews" class="carousel"></div>
+        <div id="photoReportPreviews"></div>
     </div>
 
     <div class="block" style="margin-bottom: 0;">
@@ -168,7 +167,13 @@
         
         for (const file of files) {
             const id = 'file_' + Math.random().toString(36).substr(2, 9);
-            if (file.type.startsWith('image/')) {
+            
+            // Если это 3-й блок (Фотоотчет), мы НЕ грузим картинку в память. Просто кладем файл.
+            if (category === 'photoReport' && file.type.startsWith('image/')) {
+                appBasket[category].push({ id, file, type: 'image_raw' });
+            } 
+            // Для 1 и 2 блока (Акты, Документы) - стандартная отрисовка карусели
+            else if (file.type.startsWith('image/')) {
                 await new Promise((resolve) => {
                     const img = new Image();
                     const objectUrl = URL.createObjectURL(file);
@@ -184,15 +189,39 @@
                 renderBasket(category);
             }
         }
+        if(category === 'photoReport') renderBasket(category);
         event.target.value = ''; 
     }
 
     function renderBasket(category) {
         const containerId = category + 'Previews';
         const container = document.getElementById(containerId);
-        if (!container) return; 
-        container.innerHTML = '';
+        const inputEl = document.getElementById(category);
         const clearBtn = document.getElementById('clear_' + category);
+        if (!container) return; 
+
+        // СПЕЦИАЛЬНЫЙ РЕНДЕР ДЛЯ 3-ГО БЛОКА (Smart Counter)
+        if (category === 'photoReport') {
+            if (appBasket[category].length > 0) {
+                inputEl.style.display = 'none'; 
+                container.innerHTML = `
+                    <div style="background: #E8F5E9; border: 1px solid #C8E6C9; padding: 16px; border-radius: 8px; text-align: center; margin-top: 5px;">
+                        <div style="font-size: 16px; font-weight: bold; color: #2E7D32; margin-bottom: 12px;">✅ Готово к сжатию: ${appBasket[category].length} фото</div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" onclick="document.getElementById('${category}').click()" style="flex:1; background: var(--tg-yellow); padding: 12px; border-radius: 8px; font-weight:bold; color: var(--tg-black); font-size: 14px; box-shadow: 0 2px 5px rgba(255,206,0,0.3);">➕ Догрузить</button>
+                            <button type="button" onclick="clearBasket('${category}')" style="flex:1; background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; padding: 12px; border-radius: 8px; font-weight:bold; font-size: 14px;">🗑️ Очистить</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                inputEl.style.display = 'block';
+                container.innerHTML = '';
+            }
+            return;
+        }
+
+        // СТАНДАРТНЫЙ РЕНДЕР (Карусель для 1 и 2 блоков)
+        container.innerHTML = '';
         if (clearBtn) clearBtn.style.display = appBasket[category].length > 0 ? 'block' : 'none';
 
         appBasket[category].forEach(item => {
@@ -258,6 +287,25 @@
         ctx.rotate((item.rotation * Math.PI) / 180);
         ctx.drawImage(imgObj, -(imgObj.width * scale) / 2, -(imgObj.height * scale) / 2, imgObj.width * scale, imgObj.height * scale);
         return tempCanvas.toDataURL('image/jpeg', quality);
+    }
+
+    // Ленивое сжатие (только для Фотоотчета) - 1 фото в памяти за 1 раз
+    function compressRawImage(file, maxWidth, quality) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let scale = Math.min(1, maxWidth / Math.max(img.width, img.height));
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+                URL.revokeObjectURL(objectUrl); // Немедленная очистка
+            };
+            img.src = objectUrl;
+        });
     }
 
     const abbreviations = { "диагностика/ремонт": "диагн+рем", "замена запчастей": "замена з/ч", "ТО (осмотр)": "ТО осмотр", "ТО (регламентное)": "ТО регл.", "сборка": "сборка" };
@@ -330,31 +378,33 @@
         document.getElementById('statusText').style.color = isError ? 'var(--tg-error)' : (isDone ? 'var(--tg-success)' : 'var(--tg-black)');
     }
 
-    async function processBasketCategory(category, finalPdf, PDFDocument, statusTextStr, maxWidth, quality, isA4Grid = false) {
+    async function processBasketCategory(category, finalPdf, PDFDocument, statusTextStr, maxWidth, quality) {
         const items = appBasket[category];
         if (items.length === 0) return;
         setStatus(statusTextStr);
-        let photoIndex = 0; let currentPhotoPage = null;
-        const a4W = 595.28, a4H = 841.89;
+        
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
+            
+            if (category === 'photoReport') {
+                setStatus(`Сжатие фото 📸 (${i + 1} из ${items.length})...`);
+            }
+
             if (item.type === 'pdf') {
                 const pdfToMerge = await PDFDocument.load(await item.file.arrayBuffer());
                 const copied = await finalPdf.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
                 copied.forEach(p => finalPdf.addPage(p));
+            } else if (item.type === 'image_raw') {
+                // Ленивая распаковка: фото сжимается и сразу стирается из памяти
+                const dataUrl = await compressRawImage(item.file, maxWidth, quality);
+                const img = await finalPdf.embedJpg(dataUrl);
+                const page = finalPdf.addPage([img.width, img.height]);
+                page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             } else {
+                // Фото из карусели
                 const img = await finalPdf.embedJpg(exportRotatedImage(item, maxWidth, quality));
-                if (isA4Grid) {
-                    if (photoIndex % 2 === 0) currentPhotoPage = finalPdf.addPage([a4W, a4H]);
-                    const margin = 20; const maxW = a4W - margin*2; const maxH = a4H/2 - margin*1.5;
-                    const scale = Math.min(maxW / img.width, maxH / img.height);
-                    const dW = img.width * scale, dH = img.height * scale;
-                    currentPhotoPage.drawImage(img, { x: (a4W-dW)/2, y: (photoIndex % 2 === 0) ? (a4H-dH-margin) : margin, width: dW, height: dH });
-                    photoIndex++;
-                } else {
-                    const page = finalPdf.addPage([img.width, img.height]);
-                    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
-                }
+                const page = finalPdf.addPage([img.width, img.height]);
+                page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             }
         }
     }
@@ -365,14 +415,18 @@
         const subject = document.getElementById('emailSubject').value;
         if (!ticketRegex.test(ticket) || !date || !subject || appBasket.actFiles.length === 0) { alert("⚠️ Заполните все обязательные поля и прикрепите Акт!"); return; }
         document.getElementById('statusContainer').style.display = 'block';
+        
         try {
             const { PDFDocument } = window.PDFLib; const finalPdf = await PDFDocument.create();
-            await processBasketCategory('actFiles', finalPdf, PDFDocument, "Акты...", 1600, 0.85, false);
-            await processBasketCategory('otherDocs', finalPdf, PDFDocument, "Документы...", 1600, 0.85, false);
-            await processBasketCategory('photoReport', finalPdf, PDFDocument, "Фото...", 800, 0.65, false); // Изменено на false
+            
+            await processBasketCategory('actFiles', finalPdf, PDFDocument, "Акты...", 1600, 0.85);
+            await processBasketCategory('otherDocs', finalPdf, PDFDocument, "Документы...", 1600, 0.85);
+            await processBasketCategory('photoReport', finalPdf, PDFDocument, "Фото...", 800, 0.65);
+            
             const pdfBytes = await finalPdf.save();
             const fileName = document.getElementById('fileNamePreview').innerText.replace('📄 Имя файла: ', '');
             const file = new File([new Blob([pdfBytes], { type: 'application/pdf' })], fileName, { type: 'application/pdf' });
+            
             if (action === 'share' && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({ files: [file], title: subject, text: subject });
                 setStatus("Успешно! ✅", true);
