@@ -417,31 +417,41 @@
             const fileName = document.getElementById('fileNamePreview').innerText.replace('📄 Имя файла: ', '');
             const file = new File([new Blob([pdfBytes], { type: 'application/pdf' })], fileName, { type: 'application/pdf' });
             
-            // ИСПРАВЛЕННАЯ ЛОГИКА ФИНАЛИЗАЦИИ
             if (action === 'share') {
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({ files: [file], title: subject, text: subject });
                         setStatus("Успешно отправлено! ✅", true);
                     } catch(e) {
-                        // Пользователь отменил или ошибка ОС -> запасной план (mailto)
                         const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
                         setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
                         setStatus("ОС прервала отправку. Открываем почту... 💾", true);
                     }
                 } else {
-                    // Браузер не поддерживает share
                     const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
                     setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
                     setStatus("Файл скачан. Прикрепите его к письму вручную. 💾", true);
                 }
             } else if (action === 'save') {
-                // Если нажато только СОХРАНИТЬ - качаем и ничего больше не открываем
                 const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
                 setStatus("Файл успешно сохранен! 💾", true);
             }
 
         } catch (e) { console.error(e); setStatus("Ошибка ❌", true, true); }
+    }
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then((registration) => {
+                    console.log('Service Worker успешно зарегистрирован:', registration.scope);
+                })
+                .catch((error) => {
+                    console.log('Ошибка регистрации Service Worker:', error);
+                });
+        });
     }
 </script>
 </body>
