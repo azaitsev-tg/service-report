@@ -77,6 +77,10 @@
         #spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--tg-black); animation: spin 1s infinite linear; vertical-align: middle; margin-right: 10px;}
         @keyframes spin { to { transform: rotate(360deg); } }
         #statusText { font-size: 15px; font-weight: 700; color: var(--tg-black); vertical-align: middle;}
+        
+        /* Стили для блока действий Шага 2 */
+        #actionButtons { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .success-label { text-align: center; color: var(--tg-success); font-weight: 800; font-size: 15px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -134,7 +138,7 @@
         <div class="block-title">
             <div class="block-title-left">📸 3. Фотоотчет</div>
         </div>
-        <span class="hint">Сжимается автоматически. Без превью (защита оперативной памяти телефона).</span>
+        <span class="hint">Сжимается автоматически. Без превью (защита оперативной памяти).</span>
         <input type="file" id="photoReport" accept="image/*" multiple onchange="handleFilesUpload(event, 'photoReport')">
         <div id="photoReportPreviews"></div>
     </div>
@@ -149,8 +153,15 @@
             <button type="button" class="btn-copy" onclick="copySubject()">📋 Копировать</button>
         </div>
         <div class="file-name-preview" id="fileNamePreview">📄 Имя файла: ...</div>
-        <button id="btnSend" class="btn-main" onclick="startProcess('share')">✉️ Сформировать и отправить</button>
-        <button id="btnSave" class="btn-secondary" onclick="startProcess('save')">💾 Сохранить</button>
+        
+        <button id="btnGenerate" class="btn-main" onclick="startProcess('generate')">⚙️ Сформировать отчет</button>
+        
+        <div id="actionButtons">
+            <div class="success-label">✅ PDF готов. Выберите действие:</div>
+            <button class="btn-main" style="margin-bottom: 0;" onclick="startProcess('share')">✉️ Отправить</button>
+            <button class="btn-secondary" style="margin-bottom: 0;" onclick="startProcess('save')">💾 Сохранить</button>
+        </div>
+
         <div id="statusContainer">
             <div id="spinner"></div>
             <span id="statusText">Инициализация...</span>
@@ -160,8 +171,22 @@
 
 <script>
     const appBasket = { actFiles: [], otherDocs: [], photoReport: [] };
+    
+    // Глобальные переменные для хранения готового файла
+    let readyFileForShare = null;
+    let readyFileName = "";
+    let readySubject = "";
+
+    // Сброс интерфейса: прячет кнопки Шага 2, возвращает кнопку "Сформировать"
+    function resetSendState() {
+        readyFileForShare = null;
+        document.getElementById('actionButtons').style.display = 'none';
+        document.getElementById('statusContainer').style.display = 'none';
+        document.getElementById('btnGenerate').style.display = 'block';
+    }
 
     async function handleFilesUpload(event, category) {
+        resetSendState(); // Предохранитель сброса
         const files = Array.from(event.target.files);
         if (files.length === 0) return;
         
@@ -237,6 +262,7 @@
     }
 
     function removeFile(category, id) {
+        resetSendState(); // Предохранитель сброса
         const item = appBasket[category].find(i => i.id === id);
         if (item && item.objectUrl) URL.revokeObjectURL(item.objectUrl);
         appBasket[category] = appBasket[category].filter(i => i.id !== id);
@@ -245,6 +271,7 @@
 
     function clearBasket(category) {
         if(confirm("Удалить все добавленные файлы из этого раздела?")) {
+            resetSendState(); // Предохранитель сброса
             appBasket[category].forEach(item => {
                 if (item.objectUrl) URL.revokeObjectURL(item.objectUrl);
             });
@@ -267,6 +294,7 @@
     }
 
     function rotateItem(category, id) {
+        resetSendState(); // Предохранитель сброса
         const item = appBasket[category].find(i => i.id === id);
         if (item) { item.rotation = (item.rotation + 90) % 360; drawItemCanvas(`canvas_${item.id}`, item); }
     }
@@ -343,6 +371,7 @@
     }
 
     function updateResults() {
+        resetSendState(); // Предохранитель сброса
         const ticket = document.getElementById('ticketNumber').value.trim();
         const type = document.getElementById('workType').value;
         const client = document.getElementById('clientData').value.trim();
@@ -368,9 +397,23 @@
     }
 
     function setStatus(text, isDone = false, isError = false) {
+        const statusContainer = document.getElementById('statusContainer');
+        statusContainer.style.display = 'block';
         document.getElementById('statusText').innerText = text;
         document.getElementById('spinner').style.display = isDone ? 'none' : 'inline-block';
         document.getElementById('statusText').style.color = isError ? 'var(--tg-error)' : (isDone ? 'var(--tg-success)' : 'var(--tg-black)');
+    }
+
+    // Вспомогательная функция для ручной отправки почты (Фолбэк)
+    function triggerDownloadFallback(file, fileName, subject) {
+        const link = document.createElement('a'); 
+        link.href = URL.createObjectURL(file); 
+        link.download = fileName; 
+        link.click();
+        
+        setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
+        setStatus("Файл скачан в 'Загрузки', прикрепите вручную 💾", true);
+        alert("⚠️ Внимание: почтовые программы не умеют прикреплять файлы автоматически.\n\nМы скачали ваш PDF-отчет в папку 'Загрузки' на телефоне. Пожалуйста, прикрепите его к открывшемуся письму вручную.");
     }
 
     async function processBasketCategory(category, finalPdf, PDFDocument, statusTextStr, maxWidth, quality) {
@@ -400,44 +443,66 @@
     }
 
     async function startProcess(action) {
-        const ticket = document.getElementById('ticketNumber').value.trim();
-        const date = document.getElementById('workDate').value;
-        const subject = document.getElementById('emailSubject').value;
-        if (!ticketRegex.test(ticket) || !date || !subject || appBasket.actFiles.length === 0) { alert("⚠️ Заполните все обязательные поля и прикрепите Акт!"); return; }
-        document.getElementById('statusContainer').style.display = 'block';
-        
-        try {
-            const { PDFDocument } = window.PDFLib; const finalPdf = await PDFDocument.create();
-            
-            await processBasketCategory('actFiles', finalPdf, PDFDocument, "Акты...", 1600, 0.85);
-            await processBasketCategory('otherDocs', finalPdf, PDFDocument, "Документы...", 1600, 0.85);
-            await processBasketCategory('photoReport', finalPdf, PDFDocument, "Фото...", 800, 0.65);
-            
-            const pdfBytes = await finalPdf.save();
-            const fileName = document.getElementById('fileNamePreview').innerText.replace('📄 Имя файла: ', '');
-            const file = new File([new Blob([pdfBytes], { type: 'application/pdf' })], fileName, { type: 'application/pdf' });
-            
-            if (action === 'share') {
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({ files: [file], title: subject, text: subject });
-                        setStatus("Успешно отправлено! ✅", true);
-                    } catch(e) {
-                        const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
-                        setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
-                        setStatus("ОС прервала отправку. Открываем почту... 💾", true);
-                    }
-                } else {
-                    const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
-                    setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
-                    setStatus("Файл скачан. Прикрепите его к письму вручную. 💾", true);
-                }
-            } else if (action === 'save') {
-                const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = fileName; link.click();
-                setStatus("Файл успешно сохранен! 💾", true);
+        // --- ШАГ 2: Мгновенные действия (когда PDF уже в памяти) ---
+        if (action === 'share' && readyFileForShare) {
+            if (navigator.canShare && navigator.canShare({ files: [readyFileForShare] })) {
+                try {
+                    await navigator.share({ files: [readyFileForShare], title: readySubject });
+                    setStatus("Успешно отправлено! ✅", true);
+                } catch(e) { triggerDownloadFallback(readyFileForShare, readyFileName, readySubject); }
+            } else {
+                triggerDownloadFallback(readyFileForShare, readyFileName, readySubject);
             }
+            return;
+        }
 
-        } catch (e) { console.error(e); setStatus("Ошибка ❌", true, true); }
+        if (action === 'save' && readyFileForShare) {
+            const link = document.createElement('a'); 
+            link.href = URL.createObjectURL(readyFileForShare); 
+            link.download = readyFileName; 
+            link.click();
+            setStatus("Файл успешно сохранен! 💾", true);
+            return;
+        }
+
+        // --- ШАГ 1: Валидация и Генерация (Тяжелая математика) ---
+        if (action === 'generate') {
+            const ticket = document.getElementById('ticketNumber').value.trim();
+            const date = document.getElementById('workDate').value;
+            const subject = document.getElementById('emailSubject').value;
+
+            if (!ticketRegex.test(ticket) || !date || !subject || appBasket.actFiles.length === 0) { 
+                alert("⚠️ Заполните все обязательные поля и прикрепите Акт!"); 
+                return; 
+            }
+            
+            // Прячем кнопку "Сформировать", показываем лоадер
+            document.getElementById('btnGenerate').style.display = 'none';
+            document.getElementById('actionButtons').style.display = 'none';
+            document.getElementById('statusContainer').style.display = 'block';
+            
+            try {
+                const { PDFDocument } = window.PDFLib; const finalPdf = await PDFDocument.create();
+                
+                await processBasketCategory('actFiles', finalPdf, PDFDocument, "Акты...", 1600, 0.85);
+                await processBasketCategory('otherDocs', finalPdf, PDFDocument, "Документы...", 1600, 0.85);
+                await processBasketCategory('photoReport', finalPdf, PDFDocument, "Фото...", 800, 0.65);
+                
+                const pdfBytes = await finalPdf.save();
+                readyFileName = document.getElementById('fileNamePreview').innerText.replace('📄 Имя файла: ', '');
+                readySubject = subject;
+                readyFileForShare = new File([new Blob([pdfBytes], { type: 'application/pdf' })], readyFileName, { type: 'application/pdf' });
+                
+                // PDF готов! Прячем лоадер, показываем кнопки "Отправить" и "Сохранить"
+                document.getElementById('statusContainer').style.display = 'none';
+                document.getElementById('actionButtons').style.display = 'flex';
+
+            } catch (e) { 
+                console.error(e); 
+                document.getElementById('btnGenerate').style.display = 'block';
+                setStatus("Ошибка сборки ❌", true, true); 
+            }
+        }
     }
 </script>
 
