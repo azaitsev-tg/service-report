@@ -3,117 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>Service Report</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         :root {
+            /* Базовая (светлая) палитра */
             --tg-yellow: #FFCE00;
-            --tg-black: #111111;
-            --tg-dark-gray: #2B2B2B;
-            --tg-light-gray: #F5F5F7;
-            --tg-border: #E0E0E0;
+            --tg-black: #111111;       /* Основной текст */
+            --tg-dark-gray: #2B2B2B;   /* Темные кнопки и акценты */
+            --tg-light-gray: #F5F5F7;  /* Фон всего экрана и полей ввода */
+            --tg-card-bg: #ffffff;     /* Фон карточек (блоков) */
+            --tg-border: #E0E0E0;      /* Линии и рамки */
             --tg-error: #E53935;
             --tg-success: #43A047;
+            --tg-hint: #666666;        /* Серый текст подсказок */
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; padding: 15px; background: var(--tg-light-gray); color: var(--tg-black); margin: 0; }
-        .container { max-width: 500px; margin: 0 auto; background: #ffffff; padding: 25px 20px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+        /* Автоматическая (темная) палитра */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --tg-black: #F5F5F7;       /* Текст становится светлым */
+                --tg-light-gray: #000000;  /* Фон экрана - истинно черный (экономит батарею OLED) */
+                --tg-card-bg: #1C1C1E;     /* Карточки становятся темно-серыми */
+                --tg-dark-gray: #444444;   
+                --tg-border: #38383A;      
+                --tg-success: #57D05B;
+                --tg-hint: #8E8E93;        
+            }
+        }
+
+        /* Глобальные стили с использованием переменных */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; padding: 15px; background: var(--tg-light-gray); color: var(--tg-black); margin: 0; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 500px; margin: 0 auto; background: var(--tg-card-bg); padding: 25px 20px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); transition: background 0.3s; }
         
         h3 { margin-top: 0; color: var(--tg-black); font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 4px solid var(--tg-yellow); padding-bottom: 12px; margin-bottom: 25px;}
         
         .block-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
         .block-title-left { font-size: 16px; font-weight: 700; color: var(--tg-black); display: flex; align-items: center; gap: 8px;}
-        .hint { display: block; font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.4;}
+        .hint { display: block; font-size: 13px; color: var(--tg-hint); margin-bottom: 12px; line-height: 1.4;}
         
-        .block { margin-bottom: 24px; padding: 18px; border: 1px solid var(--tg-border); border-radius: 12px; background: #ffffff; transition: box-shadow 0.3s ease; }
+        .block { margin-bottom: 24px; padding: 18px; border: 1px solid var(--tg-border); border-radius: 12px; background: var(--tg-card-bg); transition: box-shadow 0.3s ease, background 0.3s, border-color 0.3s; }
         .block:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .required { border-left: 4px solid var(--tg-yellow); background: #FFFAEB; }
+        .required { border-left: 4px solid var(--tg-yellow); }
 
         input[type="file"], input[type="text"], input[type="date"], select { 
             display: block; width: 100%; min-height: 50px; padding: 14px; border: 1.5px solid var(--tg-border); border-radius: 8px; box-sizing: border-box; font-size: 15px; margin: 0 0 12px 0; background: var(--tg-light-gray); color: var(--tg-black); transition: all 0.2s; font-family: inherit;
         }
         
-        input[type="date"] { -webkit-appearance: none; appearance: none; width: 100%; max-width: 100%; }
-        input:focus, select:focus { outline: none; border-color: var(--tg-yellow); background: #fff; box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.1); }
+        input[type="date"] { -webkit-appearance: none; appearance: none; width: 100%; max-width: 100%; color: var(--tg-black); }
+        input:focus, select:focus { outline: none; border-color: var(--tg-yellow); background: var(--tg-card-bg); box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.1); }
         
-        .checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-top: 5px; padding: 14px; background: #fff; border-radius: 8px; border: 1.5px solid var(--tg-border); cursor: pointer; transition: 0.2s;}
-        .checkbox-container:hover { border-color: #ccc; }
+        .checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-top: 5px; padding: 14px; background: var(--tg-card-bg); border-radius: 8px; border: 1.5px solid var(--tg-border); cursor: pointer; transition: 0.2s;}
+        .checkbox-container:hover { border-color: var(--tg-hint); }
         .checkbox-container input[type="checkbox"] { width: 22px; height: 22px; margin: 0; margin-top: 2px; cursor: pointer; accent-color: var(--tg-black); flex-shrink: 0;}
         .checkbox-content { display: flex; flex-direction: column; }
         .checkbox-content .title { margin: 0; font-weight: 600; font-size: 14px; color: var(--tg-black); }
         .checkbox-content .desc { font-size: 12px; color: #E65100; font-weight: normal; margin-top: 4px; line-height: 1.3;}
 
         button { cursor: pointer; border: none; border-radius: 8px; font-weight: 700; transition: all 0.2s; font-family: inherit; }
-        .btn-main { width: 100%; padding: 16px; background: var(--tg-yellow); color: var(--tg-black); font-size: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(255, 206, 0, 0.3);}
+        .btn-main { width: 100%; padding: 16px; background: var(--tg-yellow); color: #111111; font-size: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(255, 206, 0, 0.3);}
         .btn-main:hover { background: #E5B900; transform: translateY(-1px); }
         .btn-main:active { transform: translateY(1px); }
-        .btn-main:disabled { background: #e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; transform: none;}
+        .btn-main:disabled { background: var(--tg-border); color: var(--tg-hint); box-shadow: none; cursor: not-allowed; transform: none;}
         
-        .btn-secondary { width: 100%; padding: 16px; background: var(--tg-dark-gray); color: #fff; font-size: 15px; margin-bottom: 10px;}
-        .btn-secondary:hover { background: var(--tg-black); }
+        .btn-secondary { width: 100%; padding: 16px; background: var(--tg-dark-gray); color: #ffffff; font-size: 15px; margin-bottom: 10px;}
+        .btn-secondary:hover { opacity: 0.9; }
         
         .btn-clear { display: none; background: transparent; border: 1.5px solid var(--tg-error); color: var(--tg-error); font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 700; transition: 0.2s; white-space: nowrap;}
-        .btn-clear:hover { background: var(--tg-error); color: white; }
+        .btn-clear:hover { background: var(--tg-error); color: #ffffff; }
         
         .carousel { display: flex; overflow-x: auto; gap: 12px; padding: 8px 4px 12px 4px; margin-top: 5px; scrollbar-width: thin; scroll-behavior: smooth;}
         .carousel::-webkit-scrollbar { height: 6px; }
         .carousel::-webkit-scrollbar-thumb { background-color: var(--tg-border); border-radius: 4px; }
         
-        .preview-item { flex: 0 0 130px; position: relative; text-align: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--tg-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+        .preview-item { flex: 0 0 130px; position: relative; text-align: center; background: var(--tg-card-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--tg-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
         .preview-canvas { max-width: 100%; height: 110px; object-fit: contain; background: var(--tg-light-gray); border-radius: 4px;}
         
-        .btn-remove { position: absolute; top: -8px; right: -8px; background: var(--tg-error); color: #fff; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(229,57,53,0.3); z-index: 10; cursor: pointer; transition: 0.2s;}
-        .btn-rotate { background: #e0e0e0; padding: 6px; font-size: 11px; margin-top: 8px; width: 100%; color: var(--tg-black); font-weight: 700; border-radius: 6px;}
+        .btn-remove { position: absolute; top: -8px; right: -8px; background: var(--tg-error); color: #ffffff; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(229,57,53,0.3); z-index: 10; cursor: pointer; transition: 0.2s;}
+        .btn-rotate { background: var(--tg-border); padding: 6px; font-size: 11px; margin-top: 8px; width: 100%; color: var(--tg-black); font-weight: 700; border-radius: 6px;}
         
         .result-box { display: flex; gap: 8px; margin-bottom: 8px; }
-        .result-box input { margin-bottom: 0; background: #fff; color: var(--tg-black); font-weight: 700; border: 2px solid var(--tg-dark-gray); font-size: 14px;}
-        .btn-copy { background: var(--tg-dark-gray); color: white; padding: 0 16px; border-radius: 8px; white-space: nowrap;}
+        .result-box input { margin-bottom: 0; background: var(--tg-card-bg); color: var(--tg-black); font-weight: 700; border: 2px solid var(--tg-dark-gray); font-size: 14px;}
+        .btn-copy { background: var(--tg-dark-gray); color: #ffffff; padding: 0 16px; border-radius: 8px; white-space: nowrap;}
         
-        .file-name-preview { font-size: 12px; color: #666; font-family: monospace; background: #eee; padding: 8px; border-radius: 6px; margin-bottom: 20px; word-break: break-all;}
+        .file-name-preview { font-size: 12px; color: var(--tg-hint); font-family: monospace; background: var(--tg-light-gray); padding: 8px; border-radius: 6px; margin-bottom: 20px; word-break: break-all;}
 
-        #statusContainer { display: none; margin-top: 15px; padding: 16px; border-radius: 8px; background: #FFFDE7; border: 1px solid #FFF59D; text-align: center;}
+        #statusContainer { display: none; margin-top: 15px; padding: 16px; border-radius: 8px; background: var(--tg-card-bg); border: 1px solid var(--tg-border); text-align: center;}
         #spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--tg-black); animation: spin 1s infinite linear; vertical-align: middle; margin-right: 10px;}
         @keyframes spin { to { transform: rotate(360deg); } }
         #statusText { font-size: 15px; font-weight: 700; color: var(--tg-black); vertical-align: middle;}
         
         #actionButtons { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
         .success-label { text-align: center; color: var(--tg-success); font-weight: 800; font-size: 15px; margin-bottom: 5px; }
-
-        /* =========================================
-           АВТОМАТИЧЕСКАЯ ТЕМНАЯ ТЕМА (DARK MODE)
-           ========================================= */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --tg-black: #F5F5F7;       /* Светлый текст */
-                --tg-light-gray: #121212;  /* Очень темный фон */
-                --tg-dark-gray: #444444;   /* Серые акценты */
-                --tg-border: #38383A;      /* Темные границы */
-                --tg-success: #57D05B;     /* Более яркий зеленый для контраста */
-            }
-            body { background: #000000; }
-            .container { background: #1C1C1E; box-shadow: 0 8px 30px rgba(0,0,0,0.8); }
-            .block { background: #1C1C1E; }
-            .required { background: #2A2205; } /* Темно-желтый акцент */
-            
-            input[type="file"], input[type="text"], input[type="date"], select { background: #2C2C2E; color: #F5F5F7; }
-            input:focus, select:focus { background: #3A3A3C; box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.2); }
-            
-            .checkbox-container { background: #2C2C2E; }
-            .checkbox-content .desc { color: #FF9F0A; } /* Оранжевый лучше читается на темном */
-            .hint { color: #8E8E93; }
-            
-            .preview-item { background: #2C2C2E; }
-            .preview-canvas { background: #1C1C1E; }
-            .btn-rotate { background: #3A3A3C; color: #F5F5F7; }
-            
-            .result-box input { background: #2C2C2E; }
-            .file-name-preview { background: #2C2C2E; color: #8E8E93; }
-            
-            #statusContainer { background: #2A2205; border-color: #4D3E00; }
-            .btn-secondary { background: #3A3A3C; color: #fff; }
-        }
     </style>
 </head>
 <body>
@@ -136,7 +120,7 @@
             <option value="сборка">Сборка</option>
         </select>
         <input type="text" id="clientData" placeholder="Заказчик / Объект" oninput="updateResults()">
-        <label style="font-size: 13px; font-weight: 600; color: #666; margin-bottom: 4px; display: block;">📅 Дата выполнения работ <span style="color:red">*</span></label>
+        <label style="font-size: 13px; font-weight: 600; color: var(--tg-hint); margin-bottom: 4px; display: block;">📅 Дата выполнения работ <span style="color:var(--tg-error)">*</span></label>
         <input type="date" id="workDate" onchange="updateResults()">
         <label class="checkbox-container">
             <input type="checkbox" id="hasPartsOrder" onchange="updateResults()">
@@ -149,7 +133,7 @@
 
     <div class="block required">
         <div class="block-title">
-            <div class="block-title-left">📝 1. Акт выполненных работ <span style="color:red; margin-left:4px;">*</span></div>
+            <div class="block-title-left">📝 1. Акт выполненных работ <span style="color:var(--tg-error); margin-left:4px;">*</span></div>
             <button class="btn-clear" id="clear_actFiles" onclick="clearBasket('actFiles')">🗑️ Очистить</button>
         </div>
         <span class="hint">Фото или PDF. Можно догружать файлы.</span>
@@ -258,11 +242,11 @@
             if (appBasket[category].length > 0) {
                 inputEl.style.display = 'none'; 
                 container.innerHTML = `
-                    <div style="background: #E8F5E9; border: 1px solid #C8E6C9; padding: 16px; border-radius: 8px; text-align: center; margin-top: 5px;">
-                        <div style="font-size: 16px; font-weight: bold; color: #2E7D32; margin-bottom: 12px;">✅ Готово к сжатию: ${appBasket[category].length} фото</div>
+                    <div style="background: rgba(67, 160, 71, 0.1); border: 1px solid var(--tg-success); padding: 16px; border-radius: 8px; text-align: center; margin-top: 5px;">
+                        <div style="font-size: 16px; font-weight: bold; color: var(--tg-success); margin-bottom: 12px;">✅ Готово к сжатию: ${appBasket[category].length} фото</div>
                         <div style="display: flex; gap: 10px;">
-                            <button type="button" onclick="document.getElementById('${category}').click()" style="flex:1; background: var(--tg-yellow); padding: 12px; border-radius: 8px; font-weight:bold; color: var(--tg-black); font-size: 14px; box-shadow: 0 2px 5px rgba(255,206,0,0.3);">➕ Догрузить</button>
-                            <button type="button" onclick="clearBasket('${category}')" style="flex:1; background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; padding: 12px; border-radius: 8px; font-weight:bold; font-size: 14px;">🗑️ Очистить</button>
+                            <button type="button" onclick="document.getElementById('${category}').click()" style="flex:1; background: var(--tg-yellow); padding: 12px; border-radius: 8px; font-weight:bold; color: #111111; font-size: 14px; box-shadow: 0 2px 5px rgba(255,206,0,0.3);">➕ Догрузить</button>
+                            <button type="button" onclick="clearBasket('${category}')" style="flex:1; background: transparent; border: 1px solid var(--tg-error); color: var(--tg-error); padding: 12px; border-radius: 8px; font-weight:bold; font-size: 14px;">🗑️ Очистить</button>
                         </div>
                     </div>
                 `;
@@ -388,7 +372,7 @@
         } else {
             input.style.borderColor = 'var(--tg-border)';
             hintEl.innerHTML = 'Форматы: <b>P.XX-0000XXXX</b> или <b>ПРОЗ-XX-00XXX</b>';
-            hintEl.style.color = '#666';
+            hintEl.style.color = 'var(--tg-hint)';
         }
         updateResults();
     }
