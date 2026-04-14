@@ -78,9 +78,42 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         #statusText { font-size: 15px; font-weight: 700; color: var(--tg-black); vertical-align: middle;}
         
-        /* Стили для блока действий Шага 2 */
         #actionButtons { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
         .success-label { text-align: center; color: var(--tg-success); font-weight: 800; font-size: 15px; margin-bottom: 5px; }
+
+        /* =========================================
+           АВТОМАТИЧЕСКАЯ ТЕМНАЯ ТЕМА (DARK MODE)
+           ========================================= */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --tg-black: #F5F5F7;       /* Светлый текст */
+                --tg-light-gray: #121212;  /* Очень темный фон */
+                --tg-dark-gray: #444444;   /* Серые акценты */
+                --tg-border: #38383A;      /* Темные границы */
+                --tg-success: #57D05B;     /* Более яркий зеленый для контраста */
+            }
+            body { background: #000000; }
+            .container { background: #1C1C1E; box-shadow: 0 8px 30px rgba(0,0,0,0.8); }
+            .block { background: #1C1C1E; }
+            .required { background: #2A2205; } /* Темно-желтый акцент */
+            
+            input[type="file"], input[type="text"], input[type="date"], select { background: #2C2C2E; color: #F5F5F7; }
+            input:focus, select:focus { background: #3A3A3C; box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.2); }
+            
+            .checkbox-container { background: #2C2C2E; }
+            .checkbox-content .desc { color: #FF9F0A; } /* Оранжевый лучше читается на темном */
+            .hint { color: #8E8E93; }
+            
+            .preview-item { background: #2C2C2E; }
+            .preview-canvas { background: #1C1C1E; }
+            .btn-rotate { background: #3A3A3C; color: #F5F5F7; }
+            
+            .result-box input { background: #2C2C2E; }
+            .file-name-preview { background: #2C2C2E; color: #8E8E93; }
+            
+            #statusContainer { background: #2A2205; border-color: #4D3E00; }
+            .btn-secondary { background: #3A3A3C; color: #fff; }
+        }
     </style>
 </head>
 <body>
@@ -172,12 +205,10 @@
 <script>
     const appBasket = { actFiles: [], otherDocs: [], photoReport: [] };
     
-    // Глобальные переменные для хранения готового файла
     let readyFileForShare = null;
     let readyFileName = "";
     let readySubject = "";
 
-    // Сброс интерфейса: прячет кнопки Шага 2, возвращает кнопку "Сформировать"
     function resetSendState() {
         readyFileForShare = null;
         document.getElementById('actionButtons').style.display = 'none';
@@ -186,7 +217,7 @@
     }
 
     async function handleFilesUpload(event, category) {
-        resetSendState(); // Предохранитель сброса
+        resetSendState(); 
         const files = Array.from(event.target.files);
         if (files.length === 0) return;
         
@@ -262,7 +293,7 @@
     }
 
     function removeFile(category, id) {
-        resetSendState(); // Предохранитель сброса
+        resetSendState(); 
         const item = appBasket[category].find(i => i.id === id);
         if (item && item.objectUrl) URL.revokeObjectURL(item.objectUrl);
         appBasket[category] = appBasket[category].filter(i => i.id !== id);
@@ -271,7 +302,7 @@
 
     function clearBasket(category) {
         if(confirm("Удалить все добавленные файлы из этого раздела?")) {
-            resetSendState(); // Предохранитель сброса
+            resetSendState(); 
             appBasket[category].forEach(item => {
                 if (item.objectUrl) URL.revokeObjectURL(item.objectUrl);
             });
@@ -294,7 +325,7 @@
     }
 
     function rotateItem(category, id) {
-        resetSendState(); // Предохранитель сброса
+        resetSendState(); 
         const item = appBasket[category].find(i => i.id === id);
         if (item) { item.rotation = (item.rotation + 90) % 360; drawItemCanvas(`canvas_${item.id}`, item); }
     }
@@ -371,7 +402,7 @@
     }
 
     function updateResults() {
-        resetSendState(); // Предохранитель сброса
+        resetSendState(); 
         const ticket = document.getElementById('ticketNumber').value.trim();
         const type = document.getElementById('workType').value;
         const client = document.getElementById('clientData').value.trim();
@@ -404,7 +435,6 @@
         document.getElementById('statusText').style.color = isError ? 'var(--tg-error)' : (isDone ? 'var(--tg-success)' : 'var(--tg-black)');
     }
 
-    // Вспомогательная функция для ручной отправки почты (Фолбэк)
     function triggerDownloadFallback(file, fileName, subject) {
         const link = document.createElement('a'); 
         link.href = URL.createObjectURL(file); 
@@ -443,7 +473,6 @@
     }
 
     async function startProcess(action) {
-        // --- ШАГ 2: Мгновенные действия (когда PDF уже в памяти) ---
         if (action === 'share' && readyFileForShare) {
             if (navigator.canShare && navigator.canShare({ files: [readyFileForShare] })) {
                 try {
@@ -465,7 +494,6 @@
             return;
         }
 
-        // --- ШАГ 1: Валидация и Генерация (Тяжелая математика) ---
         if (action === 'generate') {
             const ticket = document.getElementById('ticketNumber').value.trim();
             const date = document.getElementById('workDate').value;
@@ -476,7 +504,6 @@
                 return; 
             }
             
-            // Прячем кнопку "Сформировать", показываем лоадер
             document.getElementById('btnGenerate').style.display = 'none';
             document.getElementById('actionButtons').style.display = 'none';
             document.getElementById('statusContainer').style.display = 'block';
@@ -493,7 +520,6 @@
                 readySubject = subject;
                 readyFileForShare = new File([new Blob([pdfBytes], { type: 'application/pdf' })], readyFileName, { type: 'application/pdf' });
                 
-                // PDF готов! Прячем лоадер, показываем кнопки "Отправить" и "Сохранить"
                 document.getElementById('statusContainer').style.display = 'none';
                 document.getElementById('actionButtons').style.display = 'flex';
 
