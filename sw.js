@@ -1,49 +1,40 @@
-const CACHE_NAME = 'tg-service-report-v1';
-
-// Список файлов, которые нужно сохранить в память телефона для работы без сети
-const ASSETS_TO_CACHE = [
-    './',
-    './index.html',
-    './manifest.json',
-    './icon-192.png',
-    // Сохраняем внешнюю библиотеку PDF локально!
-    'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js' 
+const CACHE_NAME = 'service-report-v2.0'; // Изменили имя кэша!
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png' // Укажите ваши реальные названия иконок, если они другие
 ];
 
-// Установка: скачиваем всё в кэш
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            console.log('Кэширование файлов...');
-            return cache.addAll(ASSETS_TO_CACHE);
-        })
-    );
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting()) // Принудительно устанавливаем новый SW
+  );
 });
 
-// Активация: удаляем старые версии кэша, если мы обновили приложение
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          // Удаляем все старые кэши, имя которых не совпадает с текущим
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
         })
-    );
+      );
+    }).then(() => self.clients.claim()) // Захватываем контроль над открытыми страницами
+  );
 });
 
-// Перехват запросов: если нет сети, отдаем из кэша
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            // Если файл есть в кэше — отдаем его, иначе лезем в интернет
-            return response || fetch(event.request);
-        }).catch(() => {
-            // Если нет ни сети, ни кэша (страховка)
-            return caches.match('./index.html');
-        })
-    );
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Возвращаем из кэша, если есть, иначе идем в сеть
+        return response || fetch(event.request);
+      })
+  );
 });
