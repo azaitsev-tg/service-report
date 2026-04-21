@@ -2,202 +2,452 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark light">
     <title>Service Report</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         :root {
-            /* Базовая (светлая) палитра */
+            --tg-bg: #000000;
+            --tg-surface: #1C1C1E;
+            --tg-surface-variant: #2C2C2E;
             --tg-yellow: #FFCE00;
-            --tg-black: #111111;       /* Основной текст */
-            --tg-dark-gray: #2B2B2B;   /* Темные кнопки и акценты */
-            --tg-light-gray: #F5F5F7;  /* Фон всего экрана и полей ввода */
-            --tg-card-bg: #ffffff;     /* Фон карточек (блоков) */
-            --tg-border: #E0E0E0;      /* Линии и рамки */
-            --tg-error: #E53935;
-            --tg-success: #43A047;
-            --tg-hint: #666666;        /* Серый текст подсказок */
+            --tg-yellow-hover: #E5B900;
+            --tg-text: #FFFFFF;
+            --tg-text-muted: #8E8E93;
+            --tg-danger: #FF453A;
+            --tg-success: #32D74B;
+            --tg-border: #38383A;
         }
 
-        /* Автоматическая (темная) палитра */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --tg-black: #F5F5F7;       /* Текст становится светлым */
-                --tg-light-gray: #000000;  /* Фон экрана - истинно черный (экономит батарею OLED) */
-                --tg-card-bg: #1C1C1E;     /* Карточки становятся темно-серыми */
-                --tg-dark-gray: #444444;   
-                --tg-border: #38383A;      
-                --tg-success: #57D05B;
-                --tg-hint: #8E8E93;        
-            }
+        body.light-theme {
+            --tg-bg: #F5F5F7;
+            --tg-surface: #FFFFFF;
+            --tg-surface-variant: #E5E5EA;
+            --tg-yellow: #FFCE00;
+            --tg-yellow-hover: #E5B900;
+            --tg-text: #111111;
+            --tg-text-muted: #666666;
+            --tg-danger: #E53935;
+            --tg-success: #34C759;
+            --tg-border: #D1D1D6;
         }
 
-        /* Глобальные стили с использованием переменных */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; padding: 15px; background: var(--tg-light-gray); color: var(--tg-black); margin: 0; transition: background 0.3s, color 0.3s; }
-        .container { max-width: 500px; margin: 0 auto; background: var(--tg-card-bg); padding: 25px 20px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); transition: background 0.3s; }
-        
-        h3 { margin-top: 0; color: var(--tg-black); font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 4px solid var(--tg-yellow); padding-bottom: 12px; margin-bottom: 25px;}
-        
-        .block-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
-        .block-title-left { font-size: 16px; font-weight: 700; color: var(--tg-black); display: flex; align-items: center; gap: 8px;}
-        .hint { display: block; font-size: 13px; color: var(--tg-hint); margin-bottom: 12px; line-height: 1.4;}
-        
-        .block { margin-bottom: 24px; padding: 18px; border: 1px solid var(--tg-border); border-radius: 12px; background: var(--tg-card-bg); transition: box-shadow 0.3s ease, background 0.3s, border-color 0.3s; }
-        .block:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .required { border-left: 4px solid var(--tg-yellow); }
-
-        input[type="file"], input[type="text"], input[type="date"], select { 
-            display: block; width: 100%; min-height: 50px; padding: 14px; border: 1.5px solid var(--tg-border); border-radius: 8px; box-sizing: border-box; font-size: 15px; margin: 0 0 12px 0; background: var(--tg-light-gray); color: var(--tg-black); transition: all 0.2s; font-family: inherit;
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", sans-serif; 
+            background-color: var(--tg-bg); color: var(--tg-text); 
+            margin: 0; padding: 0; padding-bottom: 120px; 
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
-        
-        input[type="date"] { -webkit-appearance: none; appearance: none; width: 100%; max-width: 100%; color: var(--tg-black); }
-        input:focus, select:focus { outline: none; border-color: var(--tg-yellow); background: var(--tg-card-bg); box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.1); }
-        
-        .checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-top: 5px; padding: 14px; background: var(--tg-card-bg); border-radius: 8px; border: 1.5px solid var(--tg-border); cursor: pointer; transition: 0.2s;}
-        .checkbox-container:hover { border-color: var(--tg-hint); }
-        .checkbox-container input[type="checkbox"] { width: 22px; height: 22px; margin: 0; margin-top: 2px; cursor: pointer; accent-color: var(--tg-black); flex-shrink: 0;}
-        .checkbox-content { display: flex; flex-direction: column; }
-        .checkbox-content .title { margin: 0; font-weight: 600; font-size: 14px; color: var(--tg-black); }
-        .checkbox-content .desc { font-size: 12px; color: #E65100; font-weight: normal; margin-top: 4px; line-height: 1.3;}
 
-        button { cursor: pointer; border: none; border-radius: 8px; font-weight: 700; transition: all 0.2s; font-family: inherit; }
-        .btn-main { width: 100%; padding: 16px; background: var(--tg-yellow); color: #111111; font-size: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(255, 206, 0, 0.3);}
-        .btn-main:hover { background: #E5B900; transform: translateY(-1px); }
-        .btn-main:active { transform: translateY(1px); }
-        .btn-main:disabled { background: var(--tg-border); color: var(--tg-hint); box-shadow: none; cursor: not-allowed; transform: none;}
-        
-        .btn-secondary { width: 100%; padding: 16px; background: var(--tg-dark-gray); color: #ffffff; font-size: 15px; margin-bottom: 10px;}
-        .btn-secondary:hover { opacity: 0.9; }
-        
-        .btn-clear { display: none; background: transparent; border: 1.5px solid var(--tg-error); color: var(--tg-error); font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 700; transition: 0.2s; white-space: nowrap;}
-        .btn-clear:hover { background: var(--tg-error); color: #ffffff; }
-        
-        .carousel { display: flex; overflow-x: auto; gap: 12px; padding: 8px 4px 12px 4px; margin-top: 5px; scrollbar-width: thin; scroll-behavior: smooth;}
-        .carousel::-webkit-scrollbar { height: 6px; }
-        .carousel::-webkit-scrollbar-thumb { background-color: var(--tg-border); border-radius: 4px; }
-        
-        .preview-item { flex: 0 0 130px; position: relative; text-align: center; background: var(--tg-card-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--tg-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
-        .preview-canvas { max-width: 100%; height: 110px; object-fit: contain; background: var(--tg-light-gray); border-radius: 4px;}
-        
-        .btn-remove { position: absolute; top: -8px; right: -8px; background: var(--tg-error); color: #ffffff; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(229,57,53,0.3); z-index: 10; cursor: pointer; transition: 0.2s;}
-        .btn-rotate { background: var(--tg-border); padding: 6px; font-size: 11px; margin-top: 8px; width: 100%; color: var(--tg-black); font-weight: 700; border-radius: 6px;}
-        
-        .result-box { display: flex; gap: 8px; margin-bottom: 8px; }
-        .result-box input { margin-bottom: 0; background: var(--tg-card-bg); color: var(--tg-black); font-weight: 700; border: 2px solid var(--tg-dark-gray); font-size: 14px;}
-        .btn-copy { background: var(--tg-dark-gray); color: #ffffff; padding: 0 16px; border-radius: 8px; white-space: nowrap;}
-        
-        .file-name-preview { font-size: 12px; color: var(--tg-hint); font-family: monospace; background: var(--tg-light-gray); padding: 8px; border-radius: 6px; margin-bottom: 20px; word-break: break-all;}
+        /* Шапка */
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: rgba(var(--tg-bg), 0.8);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; border-bottom: 1px solid var(--tg-border);
+        }
+        .header-title { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
+        .header-dot { color: var(--tg-yellow); font-size: 24px; line-height: 0; }
+        .btn-menu { position: absolute; left: 15px; background: none; border: none; color: var(--tg-text); font-size: 24px; cursor: pointer; padding: 5px; }
 
-        #statusContainer { display: none; margin-top: 15px; padding: 16px; border-radius: 8px; background: var(--tg-card-bg); border: 1px solid var(--tg-border); text-align: center;}
-        #spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--tg-black); animation: spin 1s infinite linear; vertical-align: middle; margin-right: 10px;}
+        /* Шторка (Side Drawer) */
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); z-index: 1000;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+        .drawer {
+            position: fixed; top: 0; left: -300px; bottom: 0; width: 280px;
+            background: var(--tg-surface); z-index: 1001;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 2px 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+        }
+        .drawer.active { transform: translateX(300px); }
+        .drawer-header { padding: 20px; border-bottom: 1px solid var(--tg-border); display: flex; justify-content: space-between; align-items: center;}
+        .drawer-title { font-weight: 700; font-size: 18px; }
+        .btn-close-drawer { background: none; border: none; color: var(--tg-text-muted); font-size: 24px; cursor: pointer; }
+        .drawer-content { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        
+        .drawer-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--tg-border); cursor: pointer; text-decoration: none; color: var(--tg-text);}
+        .drawer-item.disabled { opacity: 0.5; cursor: not-allowed; }
+        .drawer-item-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px;}
+        .drawer-item-subtitle { font-size: 12px; color: var(--tg-text-muted); margin-top: 4px; line-height: 1.3;}
+        
+        .drawer-footer { margin-top: auto; padding-top: 20px; text-align: center; }
+        .version-text { font-size: 12px; color: var(--tg-text-muted); margin-bottom: 10px; }
+        .btn-bug { background: var(--tg-surface-variant); color: var(--tg-text); border: 1px solid var(--tg-border); padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; }
+
+        /* Контейнер и Карточки */
+        .container { padding: 80px 15px 20px; max-width: 500px; margin: 0 auto; }
+        .card { background: var(--tg-surface); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;}
+        
+        /* Поля ввода */
+        .input-group { margin-bottom: 16px; }
+        .input-label { display: block; font-size: 13px; color: var(--tg-text-muted); margin-bottom: 6px; font-weight: 600; }
+        input[type="text"], input[type="date"], select {
+            width: 100%; background: var(--tg-surface-variant); border: 2px solid transparent; color: var(--tg-text);
+            padding: 14px 16px; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.2s;
+            font-family: inherit; -webkit-appearance: none;
+        }
+        input:focus, select:focus { border-color: var(--tg-yellow); }
+        
+        /* Тумблер и Строки */
+        .row-between { display: flex; align-items: center; justify-content: space-between; }
+        .switch-row { background: var(--tg-surface-variant); padding: 12px 16px; border-radius: 12px;}
+        .switch-label { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;}
+        .info-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--tg-text-muted); color: var(--tg-text-muted); font-size: 12px; font-weight: bold; cursor: pointer; }
+        
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--tg-border); transition: .3s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        input:checked + .slider { background-color: var(--tg-yellow); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Зоны загрузки (Аккордеон) */
+        input[type="file"] { display: none; }
+        .upload-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;}
+        .upload-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--tg-text);}
+        .btn-add { width: 36px; height: 36px; background: var(--tg-yellow); color: #111; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .btn-add:active { transform: scale(0.9); }
+        
+        .accordion-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--tg-border); }
+        .btn-clear { background: transparent; color: var(--tg-danger); border: 1px solid var(--tg-danger); padding: 10px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; width: 100%; margin-top: 12px;}
+
+        /* Галерея превью */
+        .gallery { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 5px; scrollbar-width: none; }
+        .gallery::-webkit-scrollbar { display: none; }
+        .thumb { flex: 0 0 80px; height: 80px; position: relative; border-radius: 8px; overflow: hidden; background: var(--tg-surface-variant); border: 1px solid var(--tg-border); display: flex; align-items: center; justify-content: center; flex-direction: column;}
+        .thumb-canvas { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-pdf { font-size: 10px; font-weight: bold; color: var(--tg-text-muted); text-align: center; word-break: break-all; padding: 4px; }
+        .btn-remove { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; background: var(--tg-danger); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; z-index: 10;}
+        .btn-rotate { position: absolute; bottom: 4px; right: 4px; width: 22px; height: 22px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 10; border: 1px solid rgba(255,255,255,0.2);}
+
+        /* Счетчик фотоотчета */
+        .photo-counter { background: rgba(50, 215, 75, 0.1); border: 1px solid var(--tg-success); border-radius: 12px; padding: 15px; text-align: center; }
+        .photo-counter-text { color: var(--tg-success); font-weight: 700; font-size: 15px; margin-bottom: 12px;}
+        
+        /* Итоги */
+        .result-card { background: transparent; padding: 0; margin-bottom: 0; border-radius: 0; box-shadow: none; }
+        .subject-display { background: var(--tg-surface-variant); color: var(--tg-text); padding: 16px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: 0.2s; word-break: break-word; line-height: 1.4;}
+        .subject-display:active { border-color: var(--tg-yellow); background: var(--tg-surface); }
+        .filename-preview { font-family: monospace; font-size: 12px; color: var(--tg-text-muted); padding: 10px 4px; word-break: break-all;}
+
+        /* Липкий подвал */
+        .action-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; padding: 15px 20px 25px;
+            background: rgba(var(--tg-bg), 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--tg-border); z-index: 100;
+        }
+        .action-bar-inner { max-width: 500px; margin: 0 auto; display: flex; gap: 10px; }
+        
+        .btn-primary { flex: 1; background: var(--tg-yellow); color: #111; border: none; height: 56px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.1s;}
+        .btn-primary:active { transform: scale(0.98); }
+        
+        .btn-icon { width: 56px; height: 56px; background: var(--tg-surface-variant); color: var(--tg-text); border: none; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+        .btn-icon svg { width: 24px; height: 24px; fill: currentColor; }
+        #step2-buttons { display: none; width: 100%; gap: 10px; }
+        
+        /* Модалки и Тосты */
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--tg-surface); border-left: 4px solid var(--tg-yellow); color: var(--tg-text); padding: 16px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; display: flex; align-items: center; gap: 10px; font-size: 14px; white-space: nowrap;}
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: var(--tg-success); }
+        .toast.error { border-color: var(--tg-danger); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; display: flex; align-items: center; justify-content: center;}
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal { background: var(--tg-surface); width: 85%; max-width: 320px; border-radius: 16px; padding: 24px; box-sizing: border-box; transform: scale(0.95); transition: 0.3s;}
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 12px;}
+        .modal-text { font-size: 14px; color: var(--tg-text-muted); line-height: 1.5; margin-bottom: 24px;}
+        .modal-btn { width: 100%; background: var(--tg-yellow); border: none; padding: 14px; border-radius: 12px; font-weight: 700; color: #111; cursor: pointer;}
+        
+        /* Лоадер */
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(17,17,17,0.1); border-radius: 50%; border-top-color: #111; animation: spin 1s infinite linear;}
         @keyframes spin { to { transform: rotate(360deg); } }
-        #statusText { font-size: 15px; font-weight: 700; color: var(--tg-black); vertical-align: middle;}
-        
-        #actionButtons { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
-        .success-label { text-align: center; color: var(--tg-success); font-weight: 800; font-size: 15px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h3>Service Report</h3>
+<header class="header">
+    <button class="btn-menu" onclick="toggleDrawer(true)">☰</button>
+    <div class="header-title">Service Report<span class="header-dot">.</span></div>
+</header>
 
-    <div class="block">
-        <div class="block-title">
-            <div class="block-title-left">📋 Данные заявки</div>
-        </div>
-        <span class="hint" id="ticketHint">Форматы: <b>P.XX-0000XXXX</b> или <b>ПРОЗ-XX-00XXX</b></span>
-        <input type="text" id="ticketNumber" placeholder="Номер заявки (P. / ПРОЗ-)" oninput="handleTicketInput(event)">
-        <select id="workType" onchange="updateResults()">
-            <option value="" disabled selected>Вид работ...</option>
-            <option value="диагностика/ремонт">Диагностика / Ремонт</option>
-            <option value="замена запчастей">Замена запчастей</option>
-            <option value="ТО (осмотр)">ТО (осмотр)</option>
-            <option value="ТО (регламентное)">ТО (регламентное)</option>
-            <option value="сборка">Сборка</option>
-        </select>
-        <input type="text" id="clientData" placeholder="Заказчик / Объект" oninput="updateResults()">
-        <label style="font-size: 13px; font-weight: 600; color: var(--tg-hint); margin-bottom: 4px; display: block;">📅 Дата выполнения работ <span style="color:var(--tg-error)">*</span></label>
-        <input type="date" id="workDate" onchange="updateResults()">
-        <label class="checkbox-container">
-            <input type="checkbox" id="hasPartsOrder" onchange="updateResults()">
-            <div class="checkbox-content">
-                <span class="title">К отчету прилагается лист заказа запчастей</span>
-                <span class="desc">⚠️ Важно: Файл листа заказа (Excel/Word) необходимо прикрепить вручную.</span>
+<div class="drawer-overlay" onclick="toggleDrawer(false)"></div>
+<div class="drawer" id="sideDrawer">
+    <div class="drawer-header">
+        <div class="drawer-title">Меню</div>
+        <button class="btn-close-drawer" onclick="toggleDrawer(false)">✕</button>
+    </div>
+    <div class="drawer-content">
+        <div class="drawer-item" onclick="showModal('modalManual')">
+            <div>
+                <div class="drawer-item-title">📖 Инструкция</div>
+                <div class="drawer-item-subtitle">Руководство пользователя</div>
             </div>
-        </label>
-    </div>
-
-    <div class="block required">
-        <div class="block-title">
-            <div class="block-title-left">📝 1. Акт выполненных работ <span style="color:var(--tg-error); margin-left:4px;">*</span></div>
-            <button class="btn-clear" id="clear_actFiles" onclick="clearBasket('actFiles')">🗑️ Очистить</button>
         </div>
-        <span class="hint">Фото или PDF. Можно догружать файлы.</span>
-        <input type="file" id="actFiles" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'actFiles')">
-        <div id="actFilesPreviews" class="carousel"></div>
-    </div>
-
-    <div class="block">
-        <div class="block-title">
-            <div class="block-title-left">🗂️ 2. Прочие документы</div>
-            <button class="btn-clear" id="clear_otherDocs" onclick="clearBasket('otherDocs')">🗑️ Очистить</button>
+        <div class="drawer-item disabled">
+            <div>
+                <div class="drawer-item-title">🗂️ История отчетов</div>
+                <div class="drawer-item-subtitle">В разработке (Версия 3.0)</div>
+            </div>
         </div>
-        <span class="hint">УПД, Накладная (Фото или PDF). Можно догружать.</span>
-        <input type="file" id="otherDocs" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'otherDocs')">
-        <div id="otherDocsPreviews" class="carousel"></div>
-    </div>
-
-    <div class="block">
-        <div class="block-title">
-            <div class="block-title-left">📸 3. Фотоотчет</div>
-        </div>
-        <span class="hint">Сжимается автоматически. Без превью (защита оперативной памяти).</span>
-        <input type="file" id="photoReport" accept="image/*" multiple onchange="handleFilesUpload(event, 'photoReport')">
-        <div id="photoReportPreviews"></div>
-    </div>
-
-    <div class="block" style="margin-bottom: 0;">
-        <div class="block-title">
-            <div class="block-title-left">🚀 Итоги и отправка</div>
-        </div>
-        <span class="hint">Тема письма:</span>
-        <div class="result-box">
-            <input type="text" id="emailSubject" readonly placeholder="Заполните данные выше...">
-            <button type="button" class="btn-copy" onclick="copySubject()">📋 Копировать</button>
-        </div>
-        <div class="file-name-preview" id="fileNamePreview">📄 Имя файла: ...</div>
         
-        <button id="btnGenerate" class="btn-main" onclick="startProcess('generate')">⚙️ Сформировать отчет</button>
-        
-        <div id="actionButtons">
-            <div class="success-label">✅ PDF готов. Выберите действие:</div>
-            <button class="btn-main" style="margin-bottom: 0;" onclick="startProcess('share')">✉️ Отправить</button>
-            <button class="btn-secondary" style="margin-bottom: 0;" onclick="startProcess('save')">💾 Сохранить</button>
-        </div>
+        <div class="input-label" style="margin-top: 20px; margin-bottom: 5px;">База знаний</div>
+        <a href="https://direct.technogym.com/ACD/delivery/index.jsp#/V=2/home" target="_blank" class="drawer-item">
+            <div>
+                <div class="drawer-item-title">🔧 Technogym Direct</div>
+                <div class="drawer-item-subtitle">Каталоги запчастей и бюллетени</div>
+            </div>
+        </a>
+        <a href="https://technogym.docebosaas.com/learn" target="_blank" class="drawer-item">
+            <div>
+                <div class="drawer-item-title">🎓 E-Learning</div>
+                <div class="drawer-item-subtitle">Видеокурсы по ремонту</div>
+            </div>
+        </a>
 
-        <div id="statusContainer">
-            <div id="spinner"></div>
-            <span id="statusText">Инициализация...</span>
+        <div class="input-label" style="margin-top: 20px; margin-bottom: 5px;">Настройки</div>
+        <div class="row-between switch-row">
+            <span class="switch-label">Светлая тема</span>
+            <label class="switch">
+                <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div class="drawer-footer">
+            <div class="version-text">Версия 2.0 (PWA)</div>
+            <button class="btn-bug" onclick="sendBugReport()">🐞 Сообщить об ошибке</button>
         </div>
     </div>
 </div>
 
-<script>
-    const appBasket = { actFiles: [], otherDocs: [], photoReport: [] };
+<div class="container">
     
+    <div class="card">
+        <div class="card-title">📋 Данные заявки</div>
+        <div class="input-group">
+            <span class="input-label" id="ticketHint">Номер заявки</span>
+            <input type="text" id="ticketNumber" placeholder="P. / ПРОЗ- / ITSM" oninput="handleTicketInput(event)">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Вид работ</span>
+            <select id="workType" onchange="updateResults()">
+                <option value="" disabled selected>Выберите...</option>
+                <option value="диагностика/ремонт">Диагностика / Ремонт</option>
+                <option value="замена запчастей">Замена запчастей</option>
+                <option value="ТО (осмотр)">ТО (осмотр)</option>
+                <option value="ТО (регламентное)">ТО (регламентное)</option>
+                <option value="сборка">Сборка</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <span class="input-label">Заказчик / Объект</span>
+            <input type="text" id="clientData" placeholder="Фитнес клуб..." oninput="updateResults()">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Дата работ</span>
+            <input type="date" id="workDate" onchange="updateResults()">
+        </div>
+        
+        <div class="row-between switch-row" style="margin-top: 20px;">
+            <div class="switch-label">Лист заказа <div class="info-icon" onclick="showModal('modalParts')">i</div></div>
+            <label class="switch">
+                <input type="checkbox" id="hasPartsOrder" onchange="updateResults()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="card" style="padding-bottom: 10px;">
+        <div class="upload-row">
+            <div class="upload-title">📝 Акт выполненных работ<div class="info-icon" onclick="showModal('modalDocs')">i</div></div>
+            <button class="btn-add" onclick="document.getElementById('actFiles').click()">+</button>
+        </div>
+        <input type="file" id="actFiles" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'actFiles')">
+        <div class="accordion-content" id="actFilesContent">
+            <div class="gallery" id="actFilesPreviews"></div>
+            <button class="btn-clear" onclick="clearBasket('actFiles')">🗑️ Очистить раздел</button>
+        </div>
+    </div>
+
+    <div class="card" style="padding-bottom: 10px;">
+        <div class="upload-row">
+            <div class="upload-title">🗂️ Прочие документы<div class="info-icon" onclick="showModal('modalDocs')">i</div></div>
+            <button class="btn-add" onclick="document.getElementById('otherDocs').click()">+</button>
+        </div>
+        <input type="file" id="otherDocs" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'otherDocs')">
+        <div class="accordion-content" id="otherDocsContent">
+            <div class="gallery" id="otherDocsPreviews"></div>
+            <button class="btn-clear" onclick="clearBasket('otherDocs')">🗑️ Очистить раздел</button>
+        </div>
+    </div>
+
+    <div class="card" style="padding-bottom: 10px;">
+        <div class="upload-row">
+            <div class="upload-title">📸 Фотоотчет<div class="info-icon" onclick="showModal('modalPhotos')">i</div></div>
+            <button class="btn-add" onclick="document.getElementById('photoReport').click()">+</button>
+        </div>
+        <input type="file" id="photoReport" accept="image/*" multiple onchange="handleFilesUpload(event, 'photoReport')">
+        <div class="accordion-content" id="photoReportContent">
+            <div class="photo-counter">
+                <div class="photo-counter-text" id="photoCountText">0 фото</div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button class="btn-clear" style="margin-top:0; color:var(--tg-text); border-color:var(--tg-border);" onclick="document.getElementById('photoReport').click()">+ Догрузить</button>
+                <button class="btn-clear" style="margin-top:0;" onclick="clearBasket('photoReport')">🗑️ Удалить все</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-card">
+        <div class="input-label">✉️ Тема письма (Нажмите для копирования)</div>
+        <div class="subject-display" id="emailSubjectDisplay" onclick="copySubject()">Заполните данные заявки...</div>
+        <div class="filename-preview" id="fileNamePreview">Имя файла: </div>
+    </div>
+
+</div>
+
+<div class="action-bar">
+    <div class="action-bar-inner">
+        <button id="btnGenerate" class="btn-primary" onclick="startProcess('generate')" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <div class="spinner" id="btnSpinner"></div>
+            <span id="btnGenerateText">Сформировать отчет</span>
+        </button>
+        
+        <div id="step2-buttons">
+            <button class="btn-icon" onclick="startProcess('save')" title="Сохранить">
+                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            </button>
+            <button class="btn-primary" onclick="startProcess('share')">Отправить</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalManual" onclick="closeModal('modalManual')">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">Руководство пользователя</div>
+        <div class="modal-text" style="font-size: 13px;">
+            <b>1. Данные заявки:</b> Введите номер заявки (префиксы P., ПРОЗ- или ITSM подставятся автоматически).<br><br>
+            <b>2. Документы:</b> Жмите <b>[ + ]</b>, чтобы прикрепить Акт и УПД. PDF-файлы вклеятся без изменений. Фото будут преобразованы в PDF. Для поворота фото жмите ↻ на миниатюре.<br><br>
+            <b>3. Фотоотчет:</b> Жмите <b>[ + ]</b>. Загружайте фото шильдика, неисправностей, тренажера до/во время/после ТО, а также серийники запчастей. Приложение само сожмет их, сохранив читаемость.<br><br>
+            <b>4. Отправка:</b> Нажмите «Сформировать отчет». Нажмите на сгенерированную тему письма, чтобы ее скопировать. Отправьте файл или сохраните на телефон.<br><br>
+            ⚠️ <i>Лист заказа запчастей прикрепляется к письму вручную в почтовом клиенте.</i>
+        </div>
+        <button class="modal-btn" onclick="closeModal('modalManual')">Понятно</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalParts" onclick="closeModal('modalParts')">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">Лист заказа</div>
+        <div class="modal-text">
+            ⚠️ Файл Excel/Word необходимо прикрепить к письму <b>вручную</b> в почтовом приложении.<br><br>
+            При активации тумблера к <i>теме письма</i> автоматически добавится приписка <b>"+ лист заказа"</b>. На название генерируемого PDF-файла это не повлияет.
+        </div>
+        <button class="modal-btn" onclick="closeModal('modalParts')">Понятно</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalDocs" onclick="closeModal('modalDocs')">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">Форматы документов</div>
+        <div class="modal-text">
+            Вы можете загрузить сканы (PDF) или фотографии (JPG, PNG).<br><br>
+            📄 <b>PDF-файлы</b> будут вклеены в отчет без изменений.<br>
+            📸 <b>Фотографии</b> автоматически конвертируются в книжный формат А4. Если документ снят боком, используйте кнопку <b>↻</b> на миниатюре для поворота.
+        </div>
+        <button class="modal-btn" onclick="closeModal('modalDocs')">Понятно</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalPhotos" onclick="closeModal('modalPhotos')">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">Требования к фото</div>
+        <div class="modal-text">
+            Загружайте только фото (PDF здесь не поддерживаются).<br><br>
+            <b>Что фиксируем:</b> шильдики, общий вид, неисправности. При ТО — тренажер до, во время и после. Обязательно фото серийных номеров запчастей.<br><br>
+            ⚙️ <i>Умное сжатие:</i> Приложение уменьшит вес фото в несколько раз без зависаний, гарантированно сохранив читаемость деталей.
+        </div>
+        <button class="modal-btn" onclick="closeModal('modalPhotos')">Понятно</button>
+    </div>
+</div>
+
+<div id="toast" class="toast">
+    <span id="toastIcon"></span>
+    <span id="toastMessage"></span>
+</div>
+
+<script>
+    /* === ИНИЦИАЛИЗАЦИЯ И ТЕМА === */
+    function initTheme() {
+        const savedTheme = localStorage.getItem('tg-theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeToggle').checked = true;
+        }
+    }
+    
+    function toggleTheme() {
+        const isLight = document.getElementById('themeToggle').checked;
+        if (isLight) {
+            document.body.classList.add('light-theme');
+            localStorage.setItem('tg-theme', 'light');
+        } else {
+            document.body.classList.remove('light-theme');
+            localStorage.setItem('tg-theme', 'dark');
+        }
+    }
+    initTheme();
+
+    /* === UI КОМПОНЕНТЫ === */
+    function toggleDrawer(show) {
+        document.querySelector('.drawer-overlay').classList.toggle('active', show);
+        document.getElementById('sideDrawer').classList.toggle('active', show);
+    }
+
+    function showModal(id) { document.getElementById(id).classList.add('active'); toggleDrawer(false);}
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    let toastTimeout;
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMessage').innerText = message;
+        document.getElementById('toastIcon').innerText = type === 'success' ? '✅' : '❌';
+        toast.className = 'toast show ' + type;
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    function sendBugReport() {
+        const os = navigator.userAgent;
+        const date = new Date().toLocaleString('ru-RU');
+        const w = window.screen.width; const h = window.screen.height;
+        const body = `Описание проблемы: \n\n\n--- Техническая информация ---\nДата: ${date}\nУстройство: ${os}\nЭкран: ${w}x${h}\nВерсия: 2.0 (PWA)`;
+        window.location.href = `mailto:azaitsev@technogym.com?subject=Баг-репорт: Service Report App v2.0&body=${encodeURIComponent(body)}`;
+    }
+
+    /* === ЛОГИКА ПРИЛОЖЕНИЯ === */
+    const appBasket = { actFiles: [], otherDocs: [], photoReport: [] };
     let readyFileForShare = null;
     let readyFileName = "";
-    let readySubject = "";
+    let readySubject = ""; // Тема без .pdf
 
     function resetSendState() {
         readyFileForShare = null;
-        document.getElementById('actionButtons').style.display = 'none';
-        document.getElementById('statusContainer').style.display = 'none';
-        document.getElementById('btnGenerate').style.display = 'block';
+        document.getElementById('step2-buttons').style.display = 'none';
+        document.getElementById('btnGenerate').style.display = 'flex';
+        document.getElementById('btnGenerateText').innerText = "Сформировать отчет";
+        document.getElementById('btnSpinner').style.display = 'none';
     }
 
     async function handleFilesUpload(event, category) {
@@ -207,7 +457,6 @@
         
         for (const file of files) {
             const id = 'file_' + Math.random().toString(36).substr(2, 9);
-            
             if (category === 'photoReport' && file.type.startsWith('image/')) {
                 appBasket[category].push({ id, file, type: 'image_raw' });
             } 
@@ -232,45 +481,37 @@
     }
 
     function renderBasket(category) {
-        const containerId = category + 'Previews';
-        const container = document.getElementById(containerId);
-        const inputEl = document.getElementById(category);
-        const clearBtn = document.getElementById('clear_' + category);
-        if (!container) return; 
-
-        if (category === 'photoReport') {
-            if (appBasket[category].length > 0) {
-                inputEl.style.display = 'none'; 
-                container.innerHTML = `
-                    <div style="background: rgba(67, 160, 71, 0.1); border: 1px solid var(--tg-success); padding: 16px; border-radius: 8px; text-align: center; margin-top: 5px;">
-                        <div style="font-size: 16px; font-weight: bold; color: var(--tg-success); margin-bottom: 12px;">✅ Готово к сжатию: ${appBasket[category].length} фото</div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="button" onclick="document.getElementById('${category}').click()" style="flex:1; background: var(--tg-yellow); padding: 12px; border-radius: 8px; font-weight:bold; color: #111111; font-size: 14px; box-shadow: 0 2px 5px rgba(255,206,0,0.3);">➕ Догрузить</button>
-                            <button type="button" onclick="clearBasket('${category}')" style="flex:1; background: transparent; border: 1px solid var(--tg-error); color: var(--tg-error); padding: 12px; border-radius: 8px; font-weight:bold; font-size: 14px;">🗑️ Очистить</button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                inputEl.style.display = 'block';
-                container.innerHTML = '';
-            }
+        const contentBlock = document.getElementById(category + 'Content');
+        const length = appBasket[category].length;
+        
+        // Логика Аккордеона
+        if (length > 0) {
+            contentBlock.style.display = 'block';
+        } else {
+            contentBlock.style.display = 'none';
             return;
         }
 
-        container.innerHTML = '';
-        if (clearBtn) clearBtn.style.display = appBasket[category].length > 0 ? 'block' : 'none';
+        if (category === 'photoReport') {
+            document.getElementById('photoCountText').innerText = `Готово к сжатию: ${length} фото`;
+            return;
+        }
 
+        const container = document.getElementById(category + 'Previews');
+        container.innerHTML = '';
         appBasket[category].forEach(item => {
             const div = document.createElement('div');
-            div.className = 'preview-item';
-            const removeBtn = `<div class="btn-remove" onclick="removeFile('${category}', '${item.id}')">✕</div>`;
+            div.className = 'thumb';
+            const removeBtn = `<div class="btn-remove" onclick="removeFile('${category}', '${item.id}')">×</div>`;
+            
             if (item.type === 'image') {
+                const rotateBtn = `<div class="btn-rotate" onclick="rotateItem('${category}', '${item.id}')">↻</div>`;
                 const canvasId = `canvas_${item.id}`;
-                div.innerHTML = `${removeBtn}<canvas id="${canvasId}" class="preview-canvas"></canvas><button type="button" class="btn-rotate" onclick="rotateItem('${category}', '${item.id}')">Повернуть ↻</button>`;
+                div.innerHTML = `${removeBtn}${rotateBtn}<canvas id="${canvasId}" class="thumb-canvas"></canvas>`;
                 container.appendChild(div);
                 drawItemCanvas(canvasId, item);
             } else {
-                div.innerHTML = `${removeBtn}<div style="display:flex; height:110px; align-items:center; justify-content:center; background:var(--tg-light-gray); border-radius:4px; padding:8px;"><span style="font-size:12px; font-weight:bold; word-break:break-all; color: var(--tg-black);">📄 PDF<br><br>${item.file.name}</span></div>`;
+                div.innerHTML = `${removeBtn}<span class="thumb-pdf">📄 PDF<br>${item.file.name.substring(0,10)}...</span>`;
                 container.appendChild(div);
             }
         });
@@ -285,14 +526,12 @@
     }
 
     function clearBasket(category) {
-        if(confirm("Удалить все добавленные файлы из этого раздела?")) {
-            resetSendState(); 
-            appBasket[category].forEach(item => {
-                if (item.objectUrl) URL.revokeObjectURL(item.objectUrl);
-            });
-            appBasket[category] = [];
-            renderBasket(category);
-        }
+        resetSendState(); 
+        appBasket[category].forEach(item => {
+            if (item.objectUrl) URL.revokeObjectURL(item.objectUrl);
+        });
+        appBasket[category] = [];
+        renderBasket(category);
     }
 
     function drawItemCanvas(canvasId, item) {
@@ -300,12 +539,16 @@
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         const imgObj = item.imgObj;
-        if (item.rotation % 180 === 0) { canvas.width = imgObj.width; canvas.height = imgObj.height; } 
-        else { canvas.width = imgObj.height; canvas.height = imgObj.width; }
+        
+        canvas.width = 160; canvas.height = 160;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((item.rotation * Math.PI) / 180);
-        ctx.drawImage(imgObj, -imgObj.width / 2, -imgObj.height / 2);
+        
+        let minDim = Math.min(imgObj.width, imgObj.height);
+        let maxDim = Math.max(imgObj.width, imgObj.height);
+        let scale = 160 / minDim;
+        ctx.drawImage(imgObj, -imgObj.width * scale / 2, -imgObj.height * scale / 2, imgObj.width * scale, imgObj.height * scale);
     }
 
     function rotateItem(category, id) {
@@ -314,7 +557,7 @@
         if (item) { item.rotation = (item.rotation + 90) % 360; drawItemCanvas(`canvas_${item.id}`, item); }
     }
 
-    function exportRotatedImage(item, maxWidth, quality) {
+    function exportImageForPdf(item, maxWidth, quality) {
         const tempCanvas = document.createElement('canvas');
         const imgObj = item.imgObj;
         let scale = Math.min(1, maxWidth / Math.max(imgObj.width, imgObj.height));
@@ -347,32 +590,38 @@
     }
 
     const abbreviations = { "диагностика/ремонт": "диагн+рем", "замена запчастей": "замена з/ч", "ТО (осмотр)": "ТО осмотр", "ТО (регламентное)": "ТО регл.", "сборка": "сборка" };
-    const ticketRegex = /^(P\.\d{2}-0000\d{4}|ПРОЗ-\d{2}-00\d{3})$/;
-    let previousTicketValue = "";
+    let prevTicket = "";
     
     function handleTicketInput(e) {
         let input = e.target;
         let val = input.value.toUpperCase();
-        if (val.startsWith('Р')) val = 'P' + val.substring(1);
-        let isDeleting = val.length < previousTicketValue.length;
+        
+        val = val.replace('Р', 'P').replace('П', 'ПРОЗ-').replace('Ш', 'ITSM ').replace('Е', 'ITSM ');
+        
+        let isDeleting = val.length < prevTicket.length;
         if (!isDeleting) {
             if (val === 'P') val = 'P.'; 
-            else if (val === 'П') val = 'ПРОЗ-'; 
-            else if (val.startsWith('P.') && val.length === 4 && previousTicketValue.length === 3) val += '-0000'; 
-            else if (val.startsWith('ПРОЗ-') && val.length === 7 && previousTicketValue.length === 6) val += '-00';
+            if (val === 'I' || val === 'IT' || val === 'ITS' || val === 'ITSM') val = 'ITSM ';
+            if (val.startsWith('P.') && val.length === 4 && prevTicket.length === 3) val += '-0000'; 
+            if (val.startsWith('ПРОЗ-') && val.length === 7 && prevTicket.length === 6) val += '-00';
         }
-        if (val.length > 13) val = val.substring(0, 13);
-        input.value = val; previousTicketValue = val;
+        
+        if (val.length > 13 && !val.startsWith('ITSM')) val = val.substring(0, 13);
+        if (val.startsWith('ITSM ') && val.length > 11) val = val.substring(0, 11);
+        
+        input.value = val; prevTicket = val;
+        
         const hintEl = document.getElementById('ticketHint');
+        const isValid = /^(P\.\d{2}-0000\d{4}|ПРОЗ-\d{2}-00\d{3}|ITSM \d{6})$/.test(val);
+        
         if (val.length > 0) {
-            const isValid = ticketRegex.test(val);
-            input.style.borderColor = isValid ? 'var(--tg-success)' : 'var(--tg-error)';
-            hintEl.innerHTML = isValid ? 'Формат верен ✅' : '⚠️ Ошибка формата!';
-            hintEl.style.color = isValid ? 'var(--tg-success)' : 'var(--tg-error)';
+            input.style.borderColor = isValid ? 'var(--tg-success)' : 'var(--tg-danger)';
+            hintEl.innerHTML = isValid ? 'Номер заявки ✅' : 'Ошибка формата';
+            hintEl.style.color = isValid ? 'var(--tg-success)' : 'var(--tg-danger)';
         } else {
-            input.style.borderColor = 'var(--tg-border)';
-            hintEl.innerHTML = 'Форматы: <b>P.XX-0000XXXX</b> или <b>ПРОЗ-XX-00XXX</b>';
-            hintEl.style.color = 'var(--tg-hint)';
+            input.style.borderColor = 'transparent';
+            hintEl.innerHTML = 'Номер заявки';
+            hintEl.style.color = 'var(--tg-text-muted)';
         }
         updateResults();
     }
@@ -392,31 +641,37 @@
         const client = document.getElementById('clientData').value.trim();
         const date = document.getElementById('workDate').value;
         const hasOrder = document.getElementById('hasPartsOrder').checked;
-        if (!ticket && !type && !client) return;
+        
+        if (!ticket && !type && !client) {
+            document.getElementById('emailSubjectDisplay').innerText = "Заполните данные заявки...";
+            document.getElementById('fileNamePreview').innerText = "Имя файла: ";
+            readySubject = "";
+            return;
+        }
+        
         const dates = formatDates(date);
-        let subject = [ticket, client, dates.full, abbreviations[type] || type].filter(Boolean).join(' ');
-        if (hasOrder) subject += " + лист заказа";
-        document.getElementById('emailSubject').value = subject;
-        const safeClient = client.replace(/[<>:"\/\\|?*«»]/g, '').trim();
-        document.getElementById('fileNamePreview').innerText = `📄 Имя файла: ${[ticket, safeClient, dates.short].filter(Boolean).join(' ')}.pdf`;
+        const cleanClient = client.replace(/[<>:"\/\\|?*«»]/g, '').replace(/""/g, '').trim();
+        
+        // Тема письма (полная дата, без .pdf, с листом заказа)
+        readySubject = [ticket, client, dates.full, abbreviations[type] || type].filter(Boolean).join(' ');
+        if (hasOrder) readySubject += " + лист заказа";
+        document.getElementById('emailSubjectDisplay').innerText = readySubject;
+        
+        // Имя файла (короткая дата, очищенный клиент, без листа заказа)
+        const fName = [ticket, cleanClient, dates.short].filter(Boolean).join(' ') + ".pdf";
+        document.getElementById('fileNamePreview').innerText = `Имя файла: ${fName}`;
     }
 
     function copySubject() {
-        const text = document.getElementById('emailSubject').value;
-        if (!text) return;
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector('.btn-copy');
-            btn.innerText = "✅ Готово!";
-            setTimeout(() => btn.innerText = "📋 Копировать", 2000);
+        if (!readySubject) return;
+        navigator.clipboard.writeText(readySubject).then(() => {
+            showToast("Скопировано", "success");
         });
     }
 
-    function setStatus(text, isDone = false, isError = false) {
-        const statusContainer = document.getElementById('statusContainer');
-        statusContainer.style.display = 'block';
-        document.getElementById('statusText').innerText = text;
-        document.getElementById('spinner').style.display = isDone ? 'none' : 'inline-block';
-        document.getElementById('statusText').style.color = isError ? 'var(--tg-error)' : (isDone ? 'var(--tg-success)' : 'var(--tg-black)');
+    function setBtnLoading(isLoading, text = "") {
+        document.getElementById('btnSpinner').style.display = isLoading ? 'block' : 'none';
+        document.getElementById('btnGenerateText').innerText = isLoading ? text : "Сформировать отчет";
     }
 
     function triggerDownloadFallback(file, fileName, subject) {
@@ -424,20 +679,18 @@
         link.href = URL.createObjectURL(file); 
         link.download = fileName; 
         link.click();
-        
         setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
-        setStatus("Файл скачан в 'Загрузки', прикрепите вручную 💾", true);
-        alert("⚠️ Внимание: почтовые программы не умеют прикреплять файлы автоматически.\n\nМы скачали ваш PDF-отчет в папку 'Загрузки' на телефоне. Пожалуйста, прикрепите его к открывшемуся письму вручную.");
+        showToast("Сохранено. Прикрепите вручную", "success");
     }
 
     async function processBasketCategory(category, finalPdf, PDFDocument, statusTextStr, maxWidth, quality) {
         const items = appBasket[category];
         if (items.length === 0) return;
-        setStatus(statusTextStr);
+        setBtnLoading(true, statusTextStr);
         
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            if (category === 'photoReport') setStatus(`Сжатие фото 📸 (${i + 1} из ${items.length})...`);
+            if (category === 'photoReport') setBtnLoading(true, `Сжатие (${i + 1}/${items.length})`);
 
             if (item.type === 'pdf') {
                 const pdfToMerge = await PDFDocument.load(await item.file.arrayBuffer());
@@ -449,7 +702,7 @@
                 const page = finalPdf.addPage([img.width, img.height]);
                 page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             } else {
-                const img = await finalPdf.embedJpg(exportRotatedImage(item, maxWidth, quality));
+                const img = await finalPdf.embedJpg(exportImageForPdf(item, maxWidth, quality));
                 const page = finalPdf.addPage([img.width, img.height]);
                 page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             }
@@ -461,7 +714,7 @@
             if (navigator.canShare && navigator.canShare({ files: [readyFileForShare] })) {
                 try {
                     await navigator.share({ files: [readyFileForShare], title: readySubject });
-                    setStatus("Успешно отправлено! ✅", true);
+                    showToast("Успешно", "success");
                 } catch(e) { triggerDownloadFallback(readyFileForShare, readyFileName, readySubject); }
             } else {
                 triggerDownloadFallback(readyFileForShare, readyFileName, readySubject);
@@ -474,43 +727,41 @@
             link.href = URL.createObjectURL(readyFileForShare); 
             link.download = readyFileName; 
             link.click();
-            setStatus("Файл успешно сохранен! 💾", true);
+            showToast("Файл сохранен", "success");
             return;
         }
 
         if (action === 'generate') {
             const ticket = document.getElementById('ticketNumber').value.trim();
             const date = document.getElementById('workDate').value;
-            const subject = document.getElementById('emailSubject').value;
 
-            if (!ticketRegex.test(ticket) || !date || !subject || appBasket.actFiles.length === 0) { 
-                alert("⚠️ Заполните все обязательные поля и прикрепите Акт!"); 
+            if (!/^(P\.\d{2}-0000\d{4}|ПРОЗ-\d{2}-00\d{3}|ITSM \d{6})$/.test(ticket) || !date || appBasket.actFiles.length === 0) { 
+                showToast("Проверьте заявку и Акт", "error");
                 return; 
             }
             
-            document.getElementById('btnGenerate').style.display = 'none';
-            document.getElementById('actionButtons').style.display = 'none';
-            document.getElementById('statusContainer').style.display = 'block';
+            setBtnLoading(true, "Сборка...");
             
             try {
                 const { PDFDocument } = window.PDFLib; const finalPdf = await PDFDocument.create();
                 
                 await processBasketCategory('actFiles', finalPdf, PDFDocument, "Акты...", 1600, 0.85);
                 await processBasketCategory('otherDocs', finalPdf, PDFDocument, "Документы...", 1600, 0.85);
-                await processBasketCategory('photoReport', finalPdf, PDFDocument, "Фото...", 800, 0.65);
+                await processBasketCategory('photoReport', finalPdf, PDFDocument, "Сжатие фото...", 800, 0.65);
                 
+                setBtnLoading(true, "Сохранение PDF...");
                 const pdfBytes = await finalPdf.save();
-                readyFileName = document.getElementById('fileNamePreview').innerText.replace('📄 Имя файла: ', '');
-                readySubject = subject;
+                readyFileName = document.getElementById('fileNamePreview').innerText.replace('Имя файла: ', '');
                 readyFileForShare = new File([new Blob([pdfBytes], { type: 'application/pdf' })], readyFileName, { type: 'application/pdf' });
                 
-                document.getElementById('statusContainer').style.display = 'none';
-                document.getElementById('actionButtons').style.display = 'flex';
+                document.getElementById('btnGenerate').style.display = 'none';
+                document.getElementById('step2-buttons').style.display = 'flex';
+                showToast("PDF готов", "success");
 
             } catch (e) { 
                 console.error(e); 
-                document.getElementById('btnGenerate').style.display = 'block';
-                setStatus("Ошибка сборки ❌", true, true); 
+                resetSendState();
+                showToast("Ошибка сборки", "error");
             }
         }
     }
@@ -519,13 +770,7 @@
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then((registration) => {
-                    console.log('Service Worker успешно зарегистрирован:', registration.scope);
-                })
-                .catch((error) => {
-                    console.log('Ошибка регистрации Service Worker:', error);
-                });
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
         });
     }
 </script>
