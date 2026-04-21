@@ -92,9 +92,13 @@
         .input-group { margin-bottom: 16px; }
         .input-label { display: block; font-size: 13px; color: var(--tg-text-muted); margin-bottom: 6px; font-weight: 600; }
         input[type="text"], input[type="date"], select {
-            width: 100%; background: var(--tg-surface-variant); border: 2px solid transparent; color: var(--tg-text);
-            padding: 14px 16px; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.2s;
-            font-family: inherit; -webkit-appearance: none;
+            display: block; 
+            width: 100%; 
+            height: 52px; /* Жестко фиксируем высоту для Safari */
+            background: var(--tg-surface-variant); border: 2px solid transparent; color: var(--tg-text);
+            padding: 0 16px; /* Меняем padding, чтобы текст центрировался по вертикали */
+            border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.2s;
+            font-family: inherit; -webkit-appearance: none; appearance: none; line-height: 52px;
         }
         input:focus, select:focus { border-color: var(--tg-yellow); }
         
