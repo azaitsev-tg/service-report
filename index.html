@@ -10,28 +10,15 @@
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         :root {
-            --tg-bg: #000000;
-            --tg-surface: #1C1C1E;
-            --tg-surface-variant: #2C2C2E;
-            --tg-yellow: #FFCE00;
-            --tg-text: #FFFFFF;
-            --tg-text-muted: #8E8E93;
-            --tg-danger: #FF453A;
-            --tg-success: #32D74B;
-            --tg-border: #38383A;
+            --tg-bg: #000000; --tg-surface: #1C1C1E; --tg-surface-variant: #2C2C2E;
+            --tg-yellow: #FFCE00; --tg-text: #FFFFFF; --tg-text-muted: #8E8E93;
+            --tg-danger: #FF453A; --tg-success: #32D74B; --tg-border: #38383A;
         }
-
         body.light-theme {
-            --tg-bg: #F5F5F7;
-            --tg-surface: #FFFFFF;
-            --tg-surface-variant: #E5E5EA;
-            --tg-text: #111111;
-            --tg-text-muted: #666666;
-            --tg-danger: #E53935;
-            --tg-success: #34C759;
-            --tg-border: #D1D1D6;
+            --tg-bg: #F5F5F7; --tg-surface: #FFFFFF; --tg-surface-variant: #E5E5EA;
+            --tg-text: #111111; --tg-text-muted: #666666; --tg-danger: #E53935;
+            --tg-success: #34C759; --tg-border: #D1D1D6;
         }
-
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", sans-serif; 
             background-color: var(--tg-bg); color: var(--tg-text); 
@@ -43,8 +30,7 @@
         /* Шапка */
         .header {
             position: fixed; top: 0; left: 0; right: 0; height: 60px;
-            background: rgba(var(--tg-bg), 0.8);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background: rgba(var(--tg-bg), 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             display: flex; align-items: center; justify-content: center;
             z-index: 100; border-bottom: 1px solid var(--tg-border);
         }
@@ -88,6 +74,7 @@
         /* Поля ввода */
         .input-group { margin-bottom: 16px; }
         .input-label { display: block; font-size: 13px; color: var(--tg-text-muted); margin-bottom: 6px; font-weight: 600; }
+        .input-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         input[type="text"], input[type="date"], select {
             display: block; width: 100%; height: 52px; 
             background: var(--tg-surface-variant); border: 2px solid transparent; color: var(--tg-text);
@@ -113,11 +100,15 @@
         input[type="file"] { display: none; }
         .upload-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;}
         .upload-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--tg-text);}
+        .upload-actions { display: flex; gap: 8px; align-items: center; }
+        
         .btn-add { width: 36px; height: 36px; background: var(--tg-yellow); color: #111; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
         .btn-add:active { transform: scale(0.9); }
         
+        .btn-icon-danger { width: 36px; height: 36px; background: transparent; color: var(--tg-danger); border: 1px solid var(--tg-danger); border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-icon-danger:active { background: rgba(255,69,58,0.1); transform: scale(0.9); }
+        
         .accordion-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--tg-border); }
-        .btn-clear { background: transparent; color: var(--tg-danger); border: 1px solid var(--tg-danger); padding: 10px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; width: 100%; margin-top: 12px;}
 
         /* Галерея */
         .gallery { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 5px; scrollbar-width: none; }
@@ -130,7 +121,7 @@
 
         /* Счетчик фотоотчета */
         .photo-counter { background: rgba(50, 215, 75, 0.1); border: 1px solid var(--tg-success); border-radius: 12px; padding: 15px; text-align: center; }
-        .photo-counter-text { color: var(--tg-success); font-weight: 700; font-size: 15px; margin-bottom: 12px;}
+        .photo-counter-text { color: var(--tg-success); font-weight: 700; font-size: 15px; margin-bottom: 0;}
         
         /* Итоги */
         .result-card { background: transparent; padding: 0; margin-bottom: 0; border-radius: 0; box-shadow: none; }
@@ -148,7 +139,9 @@
         .btn-primary:active { transform: scale(0.98); }
         .btn-icon { width: 56px; height: 56px; background: var(--tg-surface-variant); color: var(--tg-text); border: none; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer;}
         .btn-icon svg { width: 24px; height: 24px; fill: currentColor; }
-        #step2-buttons { display: none; width: 100%; gap: 10px; }
+        
+        #btnResetGlobal { display: none; flex: 0 0 56px; height: 56px; font-size: 22px; margin-right: 0; font-weight: normal; border: 1px solid var(--tg-danger); color: var(--tg-danger); border-radius: 14px; background: var(--tg-surface-variant); cursor: pointer; align-items: center; justify-content: center;}
+        #step2-buttons { display: none; flex: 1; gap: 10px; }
         
         /* Модалки и Тосты */
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--tg-surface); border-left: 4px solid var(--tg-yellow); color: var(--tg-text); padding: 16px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; display: flex; align-items: center; gap: 10px; font-size: 14px; white-space: nowrap;}
@@ -219,7 +212,7 @@
         </div>
         
         <div class="drawer-footer">
-            <div class="version-text">Версия 2.0 (PWA)</div>
+            <div class="version-text">Версия 2.1.0 (PWA)</div>
             <button class="btn-bug" onclick="sendBugReport()">🐞 Сообщить об ошибке</button>
         </div>
     </div>
@@ -230,8 +223,11 @@
     <div class="card">
         <div class="card-title">📋 Данные заявки</div>
         <div class="input-group">
-            <span class="input-label" id="ticketHint">Номер заявки (P. / ПРОЗ- / ITSM)</span>
-            <input type="text" id="ticketNumber" placeholder="P.XX-0000XXXX" oninput="handleTicketInput(event)">
+            <div class="input-label-row">
+                <span class="input-label" id="ticketHint" style="margin-bottom:0;">Номер заявки</span>
+                <div class="info-icon" onclick="showModal('modalTicket')">i</div>
+            </div>
+            <input type="text" id="ticketNumber" placeholder="P. / ПРОЗ- / ITSM" oninput="handleTicketInput(event)">
         </div>
         <div class="input-group">
             <span class="input-label">Вид работ</span>
@@ -265,40 +261,43 @@
     <div class="card" style="padding-bottom: 10px;">
         <div class="upload-row">
             <div class="upload-title">📝 Акт выполненных работ<div class="info-icon" onclick="showModal('modalAct')">i</div></div>
-            <button class="btn-add" onclick="document.getElementById('actFiles').click()">+</button>
+            <div class="upload-actions">
+                <button class="btn-icon-danger" id="btnClear_actFiles" style="display: none;" onclick="clearBasket('actFiles')" title="Очистить раздел">✕</button>
+                <button class="btn-add" onclick="document.getElementById('actFiles').click()">+</button>
+            </div>
         </div>
         <input type="file" id="actFiles" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'actFiles')">
         <div class="accordion-content" id="actFilesContent">
             <div class="gallery" id="actFilesPreviews"></div>
-            <button class="btn-clear" onclick="clearBasket('actFiles')">🗑️ Очистить раздел</button>
         </div>
     </div>
 
     <div class="card" style="padding-bottom: 10px;">
         <div class="upload-row">
             <div class="upload-title">🗂️ Прочие документы<div class="info-icon" onclick="showModal('modalDocs')">i</div></div>
-            <button class="btn-add" onclick="document.getElementById('otherDocs').click()">+</button>
+            <div class="upload-actions">
+                <button class="btn-icon-danger" id="btnClear_otherDocs" style="display: none;" onclick="clearBasket('otherDocs')" title="Очистить раздел">✕</button>
+                <button class="btn-add" onclick="document.getElementById('otherDocs').click()">+</button>
+            </div>
         </div>
         <input type="file" id="otherDocs" accept="image/*, application/pdf" multiple onchange="handleFilesUpload(event, 'otherDocs')">
         <div class="accordion-content" id="otherDocsContent">
             <div class="gallery" id="otherDocsPreviews"></div>
-            <button class="btn-clear" onclick="clearBasket('otherDocs')">🗑️ Очистить раздел</button>
         </div>
     </div>
 
     <div class="card" style="padding-bottom: 10px;">
         <div class="upload-row">
             <div class="upload-title">📸 Фотоотчет<div class="info-icon" onclick="showModal('modalPhotos')">i</div></div>
-            <button class="btn-add" onclick="document.getElementById('photoReport').click()">+</button>
+            <div class="upload-actions">
+                <button class="btn-icon-danger" id="btnClear_photoReport" style="display: none;" onclick="clearBasket('photoReport')" title="Очистить раздел">✕</button>
+                <button class="btn-add" onclick="document.getElementById('photoReport').click()">+</button>
+            </div>
         </div>
         <input type="file" id="photoReport" accept="image/*" multiple onchange="handleFilesUpload(event, 'photoReport')">
         <div class="accordion-content" id="photoReportContent">
             <div class="photo-counter">
                 <div class="photo-counter-text" id="photoCountText">0 фото</div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:12px;">
-                <button class="btn-clear" style="margin-top:0; color:var(--tg-text); border-color:var(--tg-border);" onclick="document.getElementById('photoReport').click()">+ Догрузить</button>
-                <button class="btn-clear" style="margin-top:0;" onclick="clearBasket('photoReport')">🗑️ Удалить все</button>
             </div>
         </div>
     </div>
@@ -312,7 +311,9 @@
 
 <div class="action-bar">
     <div class="action-bar-inner">
-        <button id="btnGenerate" class="btn-primary" onclick="startProcess('generate')" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <button id="btnResetGlobal" onclick="resetForm()" title="Начать новый отчет">🗑️</button>
+        
+        <button id="btnGenerate" class="btn-primary" onclick="startProcess('generate')" style="display: flex; align-items: center; justify-content: center; gap: 10px; flex: 1;">
             <div class="spinner" id="btnSpinner"></div>
             <span id="btnGenerateText">Сформировать отчет</span>
         </button>
@@ -326,15 +327,28 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="modalTicket" onclick="closeModal('modalTicket')">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">Форматы заявок</div>
+        <div class="modal-text" style="font-size: 13px;">
+            Примеры номеров заявок:<br><br>
+            <b>P.26-00001234</b><br>
+            <b>ПРОЗ-26-00123</b><br>
+            <b>ITSM 123456</b>
+        </div>
+        <button class="modal-btn" onclick="closeModal('modalTicket')">Понятно</button>
+    </div>
+</div>
+
 <div class="modal-overlay" id="modalManual" onclick="closeModal('modalManual')">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-title">Как пользоваться</div>
         <div class="modal-text" style="font-size: 13px;">
             <b>1. Данные:</b> Заполните номер заявки (префиксы подставятся сами), выберите вид работ и укажите клиента.<br><br>
-            <b>2. Документы:</b> Прикрепите Акт и УПД. Сканы PDF склеятся как есть, фото превратятся в PDF.<br><br>
-            <b>3. Фотоотчет:</b> Загрузите фото. Они сожмутся автоматически. Кнопка ↻ на миниатюрах поможет повернуть кадр.<br><br>
+            <b>2. Документы:</b> Прикрепите Акт и УПД. Сканы PDF склеятся как есть, фото превратятся в PDF. Кнопка ↻ на миниатюрах поможет повернуть кадр.<br><br>
+            <b>3. Фотоотчет:</b> Загрузите фото. Они сожмутся автоматически.<br><br>
             <b>4. Сборка:</b> Нажмите «Сформировать отчет».<br><br>
-            <b>5. Отправка:</b> Нажмите «Отправить» для вызова почты или «Сохранить» для загрузки в память.
+            <b>5. Отправка:</b> Нажмите «Отправить». Тема письма скопируется автоматически — вставьте её в строку темы вашей почты.
         </div>
         <button class="modal-btn" onclick="closeModal('modalManual')">Понятно</button>
     </div>
@@ -387,7 +401,7 @@
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-title">Лист заказа</div>
         <div class="modal-text">
-            ⚠️ <b>Внимание:</b> Файл листа заказа (Excel/Word) необходимо прикрепить к письму вручную.<br><br>
+            ⚠️ <b>Внимание:</b> Лист заказа (документ Excel/Word или просто текст в теле письма) необходимо добавить вручную.<br><br>
             При активации тумблера к теме письма будет автоматически добавлен текст <b>"+ лист заказа"</b>.
         </div>
         <button class="modal-btn" onclick="closeModal('modalParts')">Понятно</button>
@@ -444,8 +458,8 @@
         const os = navigator.userAgent;
         const date = new Date().toLocaleString('ru-RU');
         const w = window.screen.width; const h = window.screen.height;
-        const body = `Описание проблемы: \n\n\n--- Техническая информация ---\nДата: ${date}\nУстройство: ${os}\nЭкран: ${w}x${h}\nВерсия: 2.0 (PWA)`;
-        window.location.href = `mailto:azaitsev@technogym.com?subject=Баг-репорт: Service Report App v2.0&body=${encodeURIComponent(body)}`;
+        const body = `Описание проблемы: \n\n\n--- Техническая информация ---\nДата: ${date}\nУстройство: ${os}\nЭкран: ${w}x${h}\nВерсия: 2.1.0 (PWA)`;
+        window.location.href = `mailto:azaitsev@technogym.com?subject=Баг-репорт: Service Report App v2.1.0&body=${encodeURIComponent(body)}`;
     }
 
     /* === ЛОГИКА ПРИЛОЖЕНИЯ === */
@@ -454,12 +468,55 @@
     let readyFileName = "";
     let readySubject = ""; 
 
+    function checkDirtyState() {
+        const t = document.getElementById('ticketNumber').value.trim();
+        const w = document.getElementById('workType').value;
+        const c = document.getElementById('clientData').value.trim();
+        const d = document.getElementById('workDate').value;
+        const h = document.getElementById('hasPartsOrder').checked;
+        const files = appBasket.actFiles.length + appBasket.otherDocs.length + appBasket.photoReport.length;
+        
+        const isDirty = t || w || c || d || h || (files > 0) || readyFileForShare;
+        document.getElementById('btnResetGlobal').style.display = isDirty ? 'flex' : 'none';
+    }
+
     function resetSendState() {
         readyFileForShare = null;
         document.getElementById('step2-buttons').style.display = 'none';
         document.getElementById('btnGenerate').style.display = 'flex';
         document.getElementById('btnGenerateText').innerText = "Сформировать отчет";
         document.getElementById('btnSpinner').style.display = 'none';
+        checkDirtyState();
+    }
+
+    function resetForm() {
+        if(!confirm("Удалить текущий отчет и начать новый?")) return;
+        
+        // Удаляем тяжелые файлы из памяти
+        ['actFiles', 'otherDocs', 'photoReport'].forEach(category => {
+            appBasket[category].forEach(item => {
+                if (item.objectUrl) URL.revokeObjectURL(item.objectUrl);
+            });
+            appBasket[category] = [];
+            renderBasket(category);
+        });
+
+        // Очищаем поля формы
+        document.getElementById('ticketNumber').value = '';
+        document.getElementById('workType').value = '';
+        document.getElementById('clientData').value = '';
+        document.getElementById('workDate').value = '';
+        document.getElementById('hasPartsOrder').checked = false;
+        
+        // Сбрасываем маску и стили
+        prevTicket = ""; 
+        document.getElementById('ticketHint').innerText = 'Номер заявки';
+        document.getElementById('ticketHint').style.color = 'var(--tg-text-muted)';
+        document.getElementById('ticketNumber').style.borderColor = 'transparent';
+        
+        resetSendState();
+        updateResults();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function handleFilesUpload(event, category) {
@@ -494,13 +551,23 @@
 
     function renderBasket(category) {
         const contentBlock = document.getElementById(category + 'Content');
+        const clearBtn = document.getElementById('btnClear_' + category);
         const length = appBasket[category].length;
         
-        if (length > 0) { contentBlock.style.display = 'block'; } 
-        else { contentBlock.style.display = 'none'; return; }
+        // Управление видимостью блока и кнопки очистки раздела
+        if (length > 0) { 
+            contentBlock.style.display = 'block'; 
+            if(clearBtn) clearBtn.style.display = 'flex';
+        } else { 
+            contentBlock.style.display = 'none'; 
+            if(clearBtn) clearBtn.style.display = 'none';
+            checkDirtyState(); 
+            return; 
+        }
 
         if (category === 'photoReport') {
             document.getElementById('photoCountText').innerText = `Готово к сжатию: ${length} фото`;
+            checkDirtyState();
             return;
         }
 
@@ -522,6 +589,7 @@
                 container.appendChild(div);
             }
         });
+        checkDirtyState();
     }
 
     function removeFile(category, id) {
@@ -533,6 +601,7 @@
     }
 
     function clearBasket(category) {
+        if(appBasket[category].length === 0) return;
         if(confirm("Удалить все добавленные файлы из этого раздела?")) {
             resetSendState(); 
             appBasket[category].forEach(item => {
@@ -597,7 +666,7 @@
         });
     }
 
-    /* === УМНАЯ МАСКА ЗАЯВОК (v1.0 Logic) === */
+    /* === УМНАЯ МАСКА ЗАЯВОК === */
     const abbreviations = { "диагностика/ремонт": "диагн+рем", "замена запчастей": "замена з/ч", "ТО (осмотр)": "ТО осмотр", "ТО (регламентное)": "ТО регл.", "сборка": "сборка" };
     let prevTicket = "";
     
@@ -607,17 +676,14 @@
         let isDeleting = val.length < prevTicket.length;
 
         if (!isDeleting) {
-            // Корректируем раскладку первой буквы
             if (val === 'Р') val = 'P';
             if (val === 'G') val = 'П';
             if (val === 'Ш' || val === 'Е') val = 'I';
 
-            // Мягкая инициализация префикса
             if (val === 'P') { val = 'P.'; }
             else if (val === 'П' || val === 'ПР' || val === 'ПРО') { val = 'ПРОЗ-'; }
             else if (val === 'I' || val === 'IT' || val === 'ITS' || val === 'ITSM') { val = 'ITSM '; }
 
-            // Защита от лишних букв после префикса и авто-нули
             if (val.startsWith('P.')) {
                 val = 'P.' + val.substring(2).replace(/[^0-9\-]/g, '');
                 if (val.length === 4 && prevTicket.length === 3) val += '-0000';
@@ -642,11 +708,11 @@
         
         if (val.length > 0) {
             input.style.borderColor = isValid ? 'var(--tg-success)' : 'var(--tg-danger)';
-            hintEl.innerHTML = isValid ? 'Номер заявки ✅' : 'Ошибка формата';
+            hintEl.innerText = isValid ? 'Номер заявки ✅' : 'Ошибка формата';
             hintEl.style.color = isValid ? 'var(--tg-success)' : 'var(--tg-danger)';
         } else {
             input.style.borderColor = 'transparent';
-            hintEl.innerHTML = 'Номер заявки (P. / ПРОЗ- / ITSM)';
+            hintEl.innerText = 'Номер заявки';
             hintEl.style.color = 'var(--tg-text-muted)';
         }
         updateResults();
@@ -671,6 +737,7 @@
         if (!ticket && !type && !client) {
             document.getElementById('emailSubjectDisplay').innerText = "Заполните данные заявки...";
             readySubject = ""; readyFileName = "";
+            checkDirtyState();
             return;
         }
         
@@ -701,6 +768,8 @@
             displayEl.innerText = "Заполните заявку...";
             displayEl.style.color = "var(--tg-text-muted)";
         }
+        
+        checkDirtyState();
     }
 
     function copySubject() {
@@ -721,8 +790,8 @@
         link.download = fileName; 
         link.click();
         setTimeout(() => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`; }, 1000);
-        showToast("Сохранено. Прикрепите вручную", "success");
-        alert("⚠️ Почтовые программы не умеют прикреплять файлы автоматически.\n\nМы сохранили отчет на ваше устройство. Пожалуйста, прикрепите его к открывшемуся письму вручную.");
+        showToast("Тема письма скопирована", "success");
+        alert("⚠️ Почтовые программы не умеют прикреплять файлы автоматически.\n\nФайл сохранен на устройство. Тема письма уже скопирована в буфер обмена — пожалуйста, вставьте её и прикрепите файл вручную.");
     }
 
     async function processBasketCategory(category, finalPdf, PDFDocument, statusTextStr, maxWidth, quality) {
@@ -753,10 +822,12 @@
 
     async function startProcess(action) {
         if (action === 'share' && readyFileForShare) {
+            try { await navigator.clipboard.writeText(readySubject); } catch(e) {}
+            
             if (navigator.canShare && navigator.canShare({ files: [readyFileForShare] })) {
                 try {
                     await navigator.share({ files: [readyFileForShare], title: readySubject });
-                    showToast("Успешно", "success");
+                    showToast("Успешно (Тема скопирована)", "success");
                 } catch(e) { triggerDownloadFallback(readyFileForShare, readyFileName, readySubject); }
             } else {
                 triggerDownloadFallback(readyFileForShare, readyFileName, readySubject);
@@ -813,6 +884,14 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js').catch(() => {});
+            
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
         });
     }
 </script>
